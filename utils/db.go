@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -33,6 +34,17 @@ func GetMongoSession() *mongo.Database {
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	indexName, err := db.Collection("users").Indexes().CreateOne(
+		context.Background(),
+		mongo.IndexModel{
+			Keys:    bson.M{"email": 1},
+			Options: options.Index().SetUnique(true),
+		})
+
+	if len(indexName) > 0 {
+		fmt.Println("Indexes", indexName)
 	}
 
 	fmt.Println("Connected to DATABASE:", dbName)

@@ -44,14 +44,15 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 		return
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode(results)
 	if err != nil {
-	    http.Error(w, err.Error(), http.StatusInternalServerError)
-	    return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
+// TODO: change to getting the userId from the session
 func (uc UserController) User(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	result := model.User{}
@@ -68,38 +69,40 @@ func (uc UserController) User(w http.ResponseWriter, _ *http.Request, p httprout
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
-	    http.Error(w, err.Error(), http.StatusInternalServerError)
-	    return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
 func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusCreated)
 
-	p := r.FormValue("password")
+	pass := r.FormValue("password")
 
-	bs, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.MinCost)
+	bs, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.MinCost)
 	if err != nil {
-	    http.Error(w, err.Error(), http.StatusInternalServerError)
-	    return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	u := model.User{
-		Email: r.FormValue("email"),
+		Email:    r.FormValue("email"),
 		Password: string(bs),
 	}
 
-	_, err = uc.db.Collection("users").InsertOne(context.TODO(), u)
+	result, err := uc.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
 		var merr mongo.WriteException
 		merr = err.(mongo.WriteException)
 		errCode := merr.WriteErrors[0].Code
 
 		if errCode == 11000 {
+			w.WriteHeader(http.StatusForbidden)
 			data := map[string]string{"error": "That email is already in use."}
+
 			err = json.NewEncoder(w).Encode(data)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -110,12 +113,19 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 			return
 		}
 	} else {
-		mailSent := utils.SendMail("Test", r.FormValue("email"), "Test content")
+		mailSent := utils.SendMail("Go Starter", r.FormValue("email"), "Welcome To Go Starter")
 		var data map[string]string
 
 		if mailSent {
-			data = map[string]string{"ok": "Email sent"}
+			if oId, ok := result.InsertedID.(primitive.ObjectID); ok {
+				c := CreateSession(w, oId, uc)
+				http.SetCookie(w, c)
+
+				w.WriteHeader(http.StatusCreated)
+				data = map[string]string{"ok": "Email sent"}
+			}
 		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 			data = map[string]string{"error": "Unable to send email. Please contact support."}
 		}
 
@@ -125,4 +135,54 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 			return
 		}
 	}
+}
+
+func (uc UserController) SignIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	email := r.FormValue("email")
+	pass := r.FormValue("password")
+	result := model.User{}
+
+	err := uc.db.Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&result)
+	if err != nil {
+		http.Error(w, "username and/or password incorrect", http.StatusUnauthorized)
+		return
+	} else {
+		passErr := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(pass))
+		if passErr != nil {
+			http.Error(w, "username and/or password incorrect", http.StatusUnauthorized)
+			return
+		}
+
+		userId, objectFormHexErr := primitive.ObjectIDFromHex(result.Id)
+		if objectFormHexErr != nil {
+			http.Error(w, objectFormHexErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		c := CreateSession(w, userId, uc)
+		http.SetCookie(w, c)
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (uc UserController) SignOut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var result bson.M
+
+	c, err := r.Cookie("go-starter")
+	if err != nil {
+		http.Error(w, "cannot get cookie", http.StatusInternalServerError)
+		return
+	}
+
+	err = uc.db.Collection("sessions").FindOneAndDelete(context.TODO(), bson.M{"_id": c.Value}).Decode(&result)
+	if err != nil {
+		http.Error(w, "session not deleted", http.StatusInternalServerError)
+		return
+	}
+
+	c = &http.Cookie{
+		Name:   "go-starter",
+		Value:  "",
+		MaxAge: -1,
+	}
+	http.SetCookie(w, c)
 }

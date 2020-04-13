@@ -28,9 +28,11 @@ func main() {
 	r.GET("/", index)
 
 	// users
-	r.GET("/users", uc.AllUsers)
+	r.GET("/users", controller.CheckSession(uc.AllUsers, db))
 	r.GET("/user/:id", uc.User)
 	r.POST("/signup", uc.SignUp)
+	r.POST("/signin", uc.SignIn)
+	r.GET("/signout", uc.SignOut)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
@@ -41,8 +43,7 @@ func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	err := tpl.Execute(w, nil)
 	if err != nil {
-	    http.Error(w, err.Error(), http.StatusInternalServerError)
-	    return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
-

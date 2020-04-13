@@ -15,4 +15,3 @@ func parseDate(d string) string {
 
 	return fmt.Sprintf("%s %s %d %d", t.Weekday(), t.Month(), t.Day(), t.Year())
 }
-

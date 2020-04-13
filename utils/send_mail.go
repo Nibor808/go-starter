@@ -37,4 +37,3 @@ func SendMail(subject string, toEmail string, content string) bool {
 
 	return true
 }
-
