@@ -9,17 +9,18 @@ import (
 )
 
 func SendMail(subject string, toEmail string, content string) bool {
-	supportEmail, sEExists := os.LookupEnv("SUPPORT_EMAIL")
+	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
 	if !sEExists {
 		log.Fatal("Cannot get Support email")
 	}
+
 	apiKey, kExists := os.LookupEnv("SENDGRID_API_KEY")
 	if !kExists {
 		log.Fatal("No api key for sendgrid")
 	}
 
 	to := mail.NewEmail("", toEmail)
-	from := mail.NewEmail("ODF Support", supportEmail)
+	from := mail.NewEmail("Go Starter", adminEmail)
 
 	message := mail.NewSingleEmail(from, subject, to, content, content)
 	client := sendgrid.NewSendClient(apiKey)

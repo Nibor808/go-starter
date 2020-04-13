@@ -4,15 +4,20 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
 	"go-starter/controller"
+	"go-starter/utils"
+	"html/template"
 	"log"
 	"net/http"
-	"scheduler_backend/utils"
 )
+
+var tpl *template.Template
 
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("No env file found")
 	}
+
+	tpl = template.Must(template.ParseFiles("view/index.html"))
 }
 
 func main() {
@@ -25,7 +30,7 @@ func main() {
 	// users
 	r.GET("/users", uc.AllUsers)
 	r.GET("/user/:id", uc.User)
-	r.POST("/user/:id", uc.AddUser)
+	r.POST("/signup", uc.SignUp)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
@@ -34,9 +39,10 @@ func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/html charset=utf8")
 	w.WriteHeader(200)
 
-	_, err := w.Write([]byte(`<h1>Hello There!</h1>`))
+	err := tpl.Execute(w, nil)
 	if err != nil {
-		log.Fatalln("Index Response Error:", err)
+	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
 	}
 }
 

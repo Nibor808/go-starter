@@ -12,7 +12,7 @@ import (
 )
 
 func GetMongoSession() *mongo.Database {
-	dbConn, connExists := os.LookupEnv("DEV_DB_CONN")
+	dbConn, connExists := os.LookupEnv("DB_CONN")
 	if !connExists {
 		log.Fatal("Missing dev db connection string")
 	}

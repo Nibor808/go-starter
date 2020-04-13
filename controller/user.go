@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
+	"go-starter/model"
+	"go-starter/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"html/template"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"odf/utils"
-	"scheduler_backend/model"
 )
 
 type UserController struct {
@@ -20,12 +20,6 @@ type UserController struct {
 
 func NewUserController(db *mongo.Database) *UserController {
 	return &UserController{db}
-}
-
-var tpl *template.Template
-
-func init() {
-	tpl = template.Must(template.ParseFiles("view/index.html"))
 }
 
 func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
@@ -50,17 +44,11 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 		return
 	}
 
-	j, jsonErr := json.Marshal(results)
-	if jsonErr != nil {
-		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(200)
-	tplError := tpl.Execute(w, j)
-	if tplError != nil {
-		http.Error(w, tplError.Error(), http.StatusInternalServerError)
-		return
+	err := json.NewEncoder(w).Encode(results)
+	if err != nil {
+	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
 	}
 }
 
@@ -80,29 +68,31 @@ func (uc UserController) User(w http.ResponseWriter, _ *http.Request, p httprout
 		return
 	}
 
-	j, jsonErr := json.Marshal(result)
-	if jsonErr != nil {
-		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(200)
-	tplError := tpl.Execute(w, j)
-	if tplError != nil {
-		http.Error(w, tplError.Error(), http.StatusInternalServerError)
-		return
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
 	}
 }
 
-func (uc UserController) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	u := model.User{
-		Email: r.FormValue("email"),
+	p := r.FormValue("password")
+
+	bs, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.MinCost)
+	if err != nil {
+	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
 	}
 
-	_, err := uc.db.Collection("users").InsertOne(context.TODO(), u)
+	u := model.User{
+		Email: r.FormValue("email"),
+		Password: string(bs),
+	}
+
+	_, err = uc.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
 		var merr mongo.WriteException
 		merr = err.(mongo.WriteException)
