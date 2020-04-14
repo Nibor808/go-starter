@@ -2,7 +2,7 @@
 a starter setup for a REST api in golang
 
 ### Set up a Sendgrid account for sending email 
-```https://sendgrid.com/```
+[Sendgrid](https://sendgrid.com/)
 
 ### Add .env at project root with the following keys and add your values
 ```

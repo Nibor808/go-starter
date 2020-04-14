@@ -26,10 +26,8 @@ func main() {
 	uc := controller.NewUserController(db)
 
 	r.GET("/", index)
-
-	// users
 	r.GET("/users", controller.CheckSession(uc.AllUsers, db))
-	r.GET("/user/:id", uc.User)
+	r.GET("/user", controller.CheckSession(uc.User, db))
 	r.POST("/signup", uc.SignUp)
 	r.POST("/signin", uc.SignIn)
 	r.GET("/signout", uc.SignOut)
@@ -37,7 +35,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/html charset=utf8")
 	w.WriteHeader(200)
 

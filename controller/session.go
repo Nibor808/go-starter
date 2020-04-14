@@ -16,13 +16,13 @@ import (
 func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserController) *http.Cookie {
 	sID, _ := uuid.NewV4()
 
-	s := model.Session{
+	sess := model.Session{
 		Id:         sID.String(),
 		User:       userId,
 		LastActive: time.Now(),
 	}
 
-	_, err := uc.db.Collection("sessions").InsertOne(context.TODO(), s)
+	_, err := uc.db.Collection("sessions").InsertOne(context.TODO(), sess)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal("Session not created")
@@ -38,13 +38,15 @@ func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserCont
 
 func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		sess := model.Session{}
+
 		c, err := r.Cookie("go-starter")
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		} else {
-			_, err = db.Collection("sessions").Find(context.TODO(), bson.M{"_id": c.Value})
+			err = db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": c.Value}).Decode(&sess)
 			if err != nil {
-				http.Error(w, "you must be signed in to view this info", http.StatusUnauthorized)
+				http.Error(w, err.Error(), http.StatusUnauthorized)
 			}
 
 			h(w, r, p)

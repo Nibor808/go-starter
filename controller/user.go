@@ -52,25 +52,26 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 	}
 }
 
-// TODO: change to getting the userId from the session
-func (uc UserController) User(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
+func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	result := model.User{}
+	user := model.User{}
+	sess := model.Session{}
 
-	docId, err := primitive.ObjectIDFromHex(p.ByName("id"))
+	c, _ := r.Cookie("go-starter")
+
+	err := uc.db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": c.Value}).Decode(&sess)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = uc.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": docId}).Decode(&result)
+	err = uc.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": sess.User}).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(result)
+	err = json.NewEncoder(w).Encode(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,6 +97,7 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 	result, err := uc.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
 		var merr mongo.WriteException
+
 		merr = err.(mongo.WriteException)
 		errCode := merr.WriteErrors[0].Code
 
@@ -140,27 +142,33 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 func (uc UserController) SignIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	email := r.FormValue("email")
 	pass := r.FormValue("password")
-	result := model.User{}
+	user := model.User{}
 
-	err := uc.db.Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&result)
+	err := uc.db.Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		http.Error(w, "username and/or password incorrect", http.StatusUnauthorized)
 		return
 	} else {
-		passErr := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(pass))
+		passErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass))
 		if passErr != nil {
 			http.Error(w, "username and/or password incorrect", http.StatusUnauthorized)
 			return
 		}
 
-		userId, objectFormHexErr := primitive.ObjectIDFromHex(result.Id)
-		if objectFormHexErr != nil {
-			http.Error(w, objectFormHexErr.Error(), http.StatusInternalServerError)
+		userId, objectFromHexErr := primitive.ObjectIDFromHex(user.Id)
+		if objectFromHexErr != nil {
+			http.Error(w, objectFromHexErr.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		c := CreateSession(w, userId, uc)
 		http.SetCookie(w, c)
-		w.WriteHeader(http.StatusOK)
+
+		err = json.NewEncoder(w).Encode(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -184,5 +192,6 @@ func (uc UserController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 		Value:  "",
 		MaxAge: -1,
 	}
+
 	http.SetCookie(w, c)
 }
