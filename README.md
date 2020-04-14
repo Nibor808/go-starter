@@ -1,5 +1,5 @@
 ## Go Starter
-a starter setup for a REST api in golang
+a starter setup for a REST api in golang and mongodb
 
 ### Set up a Sendgrid account for sending email 
 [Sendgrid](https://sendgrid.com/)
@@ -16,7 +16,7 @@ ADMIN_EMAIL=<your email>
 ```
 
 ### Start app
-```go build ./main.go```
+```go run ./main.go```
 
 you should see ```Connected to DATABASE: DB_NAME``` in your console
 
