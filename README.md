@@ -15,8 +15,8 @@ SENDGRID_API_KEY=<from your sendgrid account>
 ADMIN_EMAIL=<your email>
 ```
 
-### Start app
-```go run ./main.go```
+### Start app (from inside cwd)
+```go run main.go```
 
 you should see ```Connected to DATABASE: DB_NAME``` in your console
 
