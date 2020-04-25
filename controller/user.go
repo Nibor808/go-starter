@@ -80,6 +80,7 @@ func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprout
 
 func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	var returnData map[string]string
 
 	pass := r.FormValue("password")
 
@@ -103,9 +104,9 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 
 		if errCode == 11000 {
 			w.WriteHeader(http.StatusForbidden)
-			data := map[string]string{"error": "That email is already in use."}
+			returnData = map[string]string{"error": "That email is already in use."}
 
-			err = json.NewEncoder(w).Encode(data)
+			err = json.NewEncoder(w).Encode(returnData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -116,7 +117,6 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 		}
 	} else {
 		mailSent := utils.SendMail("Go Starter", r.FormValue("email"), "Welcome To Go Starter")
-		var data map[string]string
 
 		if mailSent {
 			if oId, ok := result.InsertedID.(primitive.ObjectID); ok {
@@ -124,14 +124,14 @@ func (uc UserController) SignUp(w http.ResponseWriter, r *http.Request, _ httpro
 				http.SetCookie(w, c)
 
 				w.WriteHeader(http.StatusCreated)
-				data = map[string]string{"ok": "Email sent"}
+				returnData = map[string]string{"ok": "Email sent"}
 			}
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			data = map[string]string{"error": "Unable to send email. Please contact support."}
+			returnData = map[string]string{"error": "Unable to send email. Please contact support."}
 		}
 
-		err = json.NewEncoder(w).Encode(data)
+		err = json.NewEncoder(w).Encode(returnData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
