@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func SendMail(subject string, toEmail string, content string) bool {
+func SendMail(subject string, toEmail string, html string) bool {
 	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
 	if !sEExists {
 		log.Fatal("Cannot get Support email")
@@ -22,11 +22,10 @@ func SendMail(subject string, toEmail string, content string) bool {
 	to := mail.NewEmail("", toEmail)
 	from := mail.NewEmail("Go Starter", adminEmail)
 
-	message := mail.NewSingleEmail(from, subject, to, content, content)
+	message := mail.NewSingleEmail(from, subject, to, html, html)
 	client := sendgrid.NewSendClient(apiKey)
 
-	res, err := client.Send(message)
-	if err != nil {
+	if res, err := client.Send(message); err != nil {
 		fmt.Println("Failed to send email:", err)
 		fmt.Println("CODE:", res.StatusCode)
 		fmt.Println("BODY:", res.Body)

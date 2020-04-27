@@ -29,6 +29,8 @@ func main() {
 	r.GET("/users", controller.CheckSession(uc.AllUsers, db))
 	r.GET("/user", controller.CheckSession(uc.User, db))
 	r.POST("/signup", uc.SignUp)
+	r.GET("/verifyemail/:token/:userId", uc.ConfirmVerificationEmail)
+	r.POST("/collectpassword", uc.CollectPassword)
 	r.POST("/signin", uc.SignIn)
 	r.GET("/signout", uc.SignOut)
 

@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"net/http"
 	"time"
 )
@@ -22,10 +21,14 @@ func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserCont
 		LastActive: time.Now(),
 	}
 
-	_, err := uc.db.Collection("sessions").InsertOne(context.TODO(), sess)
-	if err != nil {
+	if _, err := uc.db.Collection("sessions").InsertOne(context.TODO(), sess); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal("Session not created")
+		return &http.Cookie{
+			Name:     "",
+			Value:    "",
+			MaxAge:   0,
+			HttpOnly: false,
+		}
 	}
 
 	return &http.Cookie{
@@ -36,6 +39,7 @@ func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserCont
 	}
 }
 
+/* middleware */
 func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		sess := model.Session{}
@@ -44,9 +48,13 @@ func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		} else {
-			err = db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": c.Value}).Decode(&sess)
+			err = db.Collection("sessions").FindOneAndUpdate(
+				context.TODO(),
+				bson.M{"_id": c.Value},
+				bson.M{"$set": bson.M{"lastActive": time.Now()}}).Decode(&sess)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
+				http.Error(w, "Session expired", http.StatusUnauthorized)
+				return
 			}
 
 			h(w, r, p)

@@ -15,9 +15,15 @@ SENDGRID_API_KEY=<from your sendgrid account>
 ADMIN_EMAIL=<your email>
 ```
 
-### Start app (from inside cwd)
+### Start app
 ```go run main.go```
 
-you should see ```Connected to DATABASE: DB_NAME``` in your console
+you should see:
 
-visit ```http://localhost:8080```
+```Indexes: email_1 creationTime_1 lastActive_1``` 
+
+```Connected to DATABASE: DB_NAME``` 
+
+in your console
+
+visit ```http://localhost:8080``` for instructions
