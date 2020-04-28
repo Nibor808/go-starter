@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserController) *http.Cookie {
+func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, ac AuthController) *http.Cookie {
 	sID, _ := uuid.NewV4()
 
 	sess := model.Session{
@@ -21,7 +21,7 @@ func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, uc UserCont
 		LastActive: time.Now(),
 	}
 
-	if _, err := uc.db.Collection("sessions").InsertOne(context.TODO(), sess); err != nil {
+	if _, err := ac.db.Collection("sessions").InsertOne(context.TODO(), sess); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return &http.Cookie{
 			Name:     "",
