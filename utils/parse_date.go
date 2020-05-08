@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func parseDate(d string) string {
+func ParseDate(d string) string {
 	layout := "2006-01-02T15:04:05.000Z"
 
 	t, err := time.Parse(layout, d)
