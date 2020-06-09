@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/julienschmidt/httprouter"
 	"go-starter/controller"
 	"go-starter/utils"
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
+	"github.com/julienschmidt/httprouter"
 )
 
 var tpl *template.Template
@@ -30,7 +31,7 @@ func main() {
 
 	/* AUTH */
 	r.POST("/signupemail", ac.SignUpEmail)
-	r.GET("/confirmemail/:token/:userId", ac.ConfirmEmail)
+	r.GET("/confirmemail/:token/:userID", ac.ConfirmEmail)
 	r.POST("/signuppassword", ac.SignUpPassword)
 	r.POST("/signin", ac.SignIn)
 	r.GET("/signout", ac.SignOut)

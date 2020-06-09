@@ -2,22 +2,23 @@ package controller
 
 import (
 	"context"
+	"go-starter/model"
+	"net/http"
+	"time"
+
 	"github.com/julienschmidt/httprouter"
 	uuid "github.com/satori/go.uuid"
-	"go-starter/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"net/http"
-	"time"
 )
 
-func CreateSession(w http.ResponseWriter, userId primitive.ObjectID, ac AuthController) *http.Cookie {
+func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthController) *http.Cookie {
 	sID, _ := uuid.NewV4()
 
 	sess := model.Session{
 		Id:         sID.String(),
-		User:       userId,
+		User:       userID,
 		LastActive: time.Now(),
 	}
 

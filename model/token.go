@@ -7,6 +7,6 @@ import (
 
 type Token struct {
 	Id           primitive.ObjectID `bson:"_id,omitempty"`
-	UserId       interface{}        `bson:"userId"`
+	UserID       interface{}        `bson:"UserID"`
 	CreationTime time.Time          `bson:"creationTime"`
 }

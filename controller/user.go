@@ -3,23 +3,26 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
 	"go-starter/model"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// UserController is ...
 type UserController struct {
 	db *mongo.Database
 }
 
+// NewUserController is ...
 func NewUserController(db *mongo.Database) *UserController {
 	return &UserController{db}
 }
 
-/* return all users */
+// AllUsers returns all users in db
 func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -48,7 +51,7 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 	}
 }
 
-/* returns user from current session */
+// User returns the user info from the current session
 func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 

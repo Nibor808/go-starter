@@ -3,16 +3,17 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
 	"go-starter/model"
 	"go-starter/utils"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type AuthController struct {
@@ -49,7 +50,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 		var htmlText strings.Builder
 
 		t := model.Token{
-			UserId:       userResult.InsertedID,
+			UserID:       userResult.InsertedID,
 			CreationTime: time.Now(),
 		}
 
@@ -102,7 +103,7 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 		return
 	}
 
-	userId, err := primitive.ObjectIDFromHex(p.ByName("userId"))
+	userID, err := primitive.ObjectIDFromHex(p.ByName("userID"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -112,13 +113,13 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 	if err != nil {
 		http.Error(w, "Token expired. Sign up again.", http.StatusUnauthorized)
 
-		err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userId}).Decode(&deletedDoc)
+		err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
 		if err != nil {
 			http.Error(w, "Unable to delete user", http.StatusUnauthorized)
 			return
 		}
 	} else {
-		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userId}).Decode(&user)
+		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 		if err != nil {
 			http.Error(w, "User not found", http.StatusUnauthorized)
 			return
@@ -196,13 +197,13 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 			return
 		}
 
-		userId, err := primitive.ObjectIDFromHex(user.Id)
+		UserID, err := primitive.ObjectIDFromHex(user.Id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		c := CreateSession(w, userId, ac)
+		c := CreateSession(w, UserID, ac)
 		http.SetCookie(w, c)
 
 		if err = json.NewEncoder(w).Encode(user); err != nil {
