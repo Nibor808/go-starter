@@ -14,7 +14,7 @@ import (
 )
 
 func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthController) *http.Cookie {
-	sID, _ := uuid.NewV4()
+	sID := uuid.NewV4()
 
 	sess := model.Session{
 		Id:         sID.String(),
