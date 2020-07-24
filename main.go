@@ -18,7 +18,7 @@ func init() {
 		log.Fatal("No env file found")
 	}
 
-	tpl = template.Must(template.ParseFiles("view/index.html"))
+	tpl = template.Must(template.ParseFiles("./view/index.html"))
 }
 
 func main() {
@@ -26,6 +26,7 @@ func main() {
 	db := utils.GetMongoSession()
 	uc := controller.NewUserController(db)
 	ac := controller.NewAuthController(db)
+	fc := controller.NewFormController(db)
 
 	r.GET("/", index)
 
@@ -40,7 +41,12 @@ func main() {
 	r.GET("/users", controller.CheckSession(uc.AllUsers, db))
 	r.GET("/user", controller.CheckSession(uc.User, db))
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	/* FORM */
+	r.POST("/saveform", fc.SaveForm)
+	r.POST("/updateform", fc.UpdateForm)
+
+	log.Println("Listening on 5000")
+	log.Fatal(http.ListenAndServe(":5000", r))
 }
 
 func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {

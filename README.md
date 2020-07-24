@@ -16,14 +16,12 @@ ADMIN_EMAIL=<your email>
 ```
 
 ### Start app
-```go run main.go```
+```docker-compose up --build```
 
-you should see:
+In your console you should see:
 
 ```Indexes: email_1 creationTime_1 lastActive_1``` 
 
 ```Connected to DATABASE: DB_NAME``` 
 
-in your console
-
-visit ```http://localhost:8080``` for instructions
+Visit ```http://localhost:5000``` for instructions
