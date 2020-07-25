@@ -11,26 +11,26 @@ import (
 	"net/http"
 )
 
-type FormController struct {
+type DataController struct {
 	db *mongo.Database
 }
 
-func NewFormController(db *mongo.Database) *FormController {
-	return &FormController{db}
+func NewDataController(db *mongo.Database) *DataController {
+	return &DataController{db}
 }
 
-func (fc FormController) SaveForm(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (fc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
-	var f model.Form
+	var data model.Data
 
-	err := json.NewDecoder(r.Body).Decode(&f)
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	formResult, err := fc.db.Collection("forms").InsertOne(context.TODO(), f)
+	formResult, err := fc.db.Collection("forms").InsertOne(context.TODO(), data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -38,29 +38,29 @@ func (fc FormController) SaveForm(w http.ResponseWriter, r *http.Request, _ http
 
 	w.WriteHeader(http.StatusOK)
 	if fId, ok := formResult.InsertedID.(primitive.ObjectID); ok {
-		f.Id = fId
+		data.Id = fId
 
-		if err = json.NewEncoder(w).Encode(f); err != nil {
+		if err = json.NewEncoder(w).Encode(data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 }
 
-func (fc FormController) UpdateForm(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (fc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
-	var f model.Form
+	var data model.Data
 
-	err := json.NewDecoder(r.Body).Decode(&f)
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	result, err := fc.db.Collection("forms").UpdateOne(context.TODO(),
-		bson.M{"_id": f.Id},
-		bson.M{"$set": bson.M{"values": f.Values}})
+		bson.M{"_id": data.Id},
+		bson.M{"$set": bson.M{"values": data.Values}})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,11 +68,11 @@ func (fc FormController) UpdateForm(w http.ResponseWriter, r *http.Request, _ ht
 
 	if result.MatchedCount != 0 {
 		w.WriteHeader(http.StatusOK)
-		if err = json.NewEncoder(w).Encode(f); err != nil {
+		if err = json.NewEncoder(w).Encode(data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
-		http.Error(w, "Form not updated", http.StatusInternalServerError)
+		http.Error(w, "Data not updated", http.StatusInternalServerError)
 	}
 }

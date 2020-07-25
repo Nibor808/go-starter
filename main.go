@@ -2,6 +2,7 @@ package main
 
 import (
 	"go-starter/controller"
+	"go-starter/middleware"
 	"go-starter/utils"
 	"html/template"
 	"log"
@@ -26,9 +27,9 @@ func main() {
 	db := utils.GetMongoSession()
 	uc := controller.NewUserController(db)
 	ac := controller.NewAuthController(db)
-	fc := controller.NewFormController(db)
+	fc := controller.NewDataController(db)
 
-	r.GET("/", index)
+	r.GET("/", middleware.LogRequest(index))
 
 	/* AUTH */
 	r.POST("/signupemail", ac.SignUpEmail)
@@ -38,12 +39,12 @@ func main() {
 	r.GET("/signout", ac.SignOut)
 
 	/* USER */
-	r.GET("/users", controller.CheckSession(uc.AllUsers, db))
-	r.GET("/user", controller.CheckSession(uc.User, db))
+	r.GET("/users", middleware.LogRequest(middleware.CheckSession(uc.AllUsers, db)))
+	r.GET("/user", middleware.CheckSession(uc.User, db))
 
 	/* FORM */
-	r.POST("/saveform", fc.SaveForm)
-	r.POST("/updateform", fc.UpdateForm)
+	r.POST("/savedata", fc.SaveData)
+	r.POST("/updatedata", fc.UpdateData)
 
 	log.Println("Listening on 5000")
 	log.Fatal(http.ListenAndServe(":5000", r))
@@ -51,7 +52,7 @@ func main() {
 
 func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/html charset=utf8")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 
 	if err := tpl.Execute(w, nil); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

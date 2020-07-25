@@ -6,11 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	uuid "github.com/satori/go.uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthController) *http.Cookie {
@@ -37,28 +34,5 @@ func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthCont
 		Value:    sID.String(),
 		MaxAge:   600,
 		HttpOnly: false,
-	}
-}
-
-/* middleware */
-func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		sess := model.Session{}
-
-		c, err := r.Cookie("go-starter")
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		} else {
-			err = db.Collection("sessions").FindOneAndUpdate(
-				context.TODO(),
-				bson.M{"_id": c.Value},
-				bson.M{"$set": bson.M{"lastActive": time.Now()}}).Decode(&sess)
-			if err != nil {
-				http.Error(w, "Session expired", http.StatusUnauthorized)
-				return
-			}
-
-			h(w, r, p)
-		}
 	}
 }
