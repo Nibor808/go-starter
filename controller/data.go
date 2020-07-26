@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"net/http"
 )
 
@@ -19,7 +20,40 @@ func NewDataController(db *mongo.Database) *DataController {
 	return &DataController{db}
 }
 
-func (fc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json charset=utf8")
+
+	var data []model.Data
+
+	cursor, findError := dc.db.Collection("data").Find(context.TODO(), bson.D{{}})
+	if findError != nil {
+		http.Error(w, findError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer func() {
+		if cerr := cursor.Close(context.TODO()); cerr != nil {
+			log.Fatal("Data cursor. Close error:", cerr)
+		}
+	}()
+
+	if cursorErr := cursor.All(context.TODO(), &data); cursorErr != nil {
+		http.Error(w, cursorErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(data) <= 0 {
+		http.Error(w, "No data available.", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
 	var data model.Data
@@ -30,7 +64,7 @@ func (fc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ http
 		return
 	}
 
-	formResult, err := fc.db.Collection("forms").InsertOne(context.TODO(), data)
+	formResult, err := dc.db.Collection("data").InsertOne(context.TODO(), data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -47,7 +81,7 @@ func (fc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ http
 	}
 }
 
-func (fc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (dc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
 	var data model.Data
@@ -58,7 +92,7 @@ func (fc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ ht
 		return
 	}
 
-	result, err := fc.db.Collection("forms").UpdateOne(context.TODO(),
+	result, err := dc.db.Collection("data").UpdateOne(context.TODO(),
 		bson.M{"_id": data.Id},
 		bson.M{"$set": bson.M{"values": data.Values}})
 	if err != nil {

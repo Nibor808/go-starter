@@ -1,29 +1,35 @@
 package middleware
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
-func LogRequest(h httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		log.SetOutput(os.Stdout)
-		uri := r.URL.String()
-		host := r.Host
+type Logger struct {
+	Handler http.Handler
+}
 
-		var ip string
-		hdrRealIP := r.Header.Get("X-Real_Ip")
-		hdrForwardedFor := r.Header.Get("X-Forwarded-For")
+func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.SetOutput(os.Stdout)
 
-		if hdrRealIP == "" || hdrForwardedFor == "" {
-			ip = r.RemoteAddr
-		} else {
+	method := r.Method
+	uri := r.URL.String()
+	var request strings.Builder
 
+	request.WriteString("\r\n******** REQUEST ********\r\n" + method + " " + uri + "\r\n")
+
+	for key, val := range r.Header {
+		request.WriteString(key + ": ")
+
+		for _, item := range val {
+			request.WriteString(item + " \r\n")
 		}
-
-		log.Println(r.Method, uri, host, ip, r.Header)
-		h(w, r, p)
 	}
+
+	request.WriteString("******** END REQUEST ********\r\n")
+
+	log.Println(request.String())
+	l.Handler.ServeHTTP(w, r)
 }

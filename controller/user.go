@@ -36,7 +36,7 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 
 	defer func() {
 		if cerr := cursor.Close(context.TODO()); cerr != nil {
-			log.Fatal("User cursor.Close error:", cerr)
+			log.Fatal("User cursor. Close error:", cerr)
 		}
 	}()
 

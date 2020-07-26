@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"go-starter/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,7 +16,6 @@ func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 
 		c, err := r.Cookie("go-starter")
 		if err != nil {
-			fmt.Println("HERE-------SESS")
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		} else {
 			err = db.Collection("sessions").FindOneAndUpdate(

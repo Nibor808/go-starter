@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
@@ -16,7 +17,7 @@ var tpl *template.Template
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("No env file found")
+		log.Println("No env file found")
 	}
 
 	tpl = template.Must(template.ParseFiles("./view/index.html"))
@@ -27,9 +28,9 @@ func main() {
 	db := utils.GetMongoSession()
 	uc := controller.NewUserController(db)
 	ac := controller.NewAuthController(db)
-	fc := controller.NewDataController(db)
+	dc := controller.NewDataController(db)
 
-	r.GET("/", middleware.LogRequest(index))
+	r.GET("/", index)
 
 	/* AUTH */
 	r.POST("/signupemail", ac.SignUpEmail)
@@ -39,15 +40,32 @@ func main() {
 	r.GET("/signout", ac.SignOut)
 
 	/* USER */
-	r.GET("/users", middleware.LogRequest(middleware.CheckSession(uc.AllUsers, db)))
+	r.GET("/users", middleware.CheckSession(uc.AllUsers, db))
 	r.GET("/user", middleware.CheckSession(uc.User, db))
 
 	/* FORM */
-	r.POST("/savedata", fc.SaveData)
-	r.POST("/updatedata", fc.UpdateData)
+	r.GET("/alldata", middleware.CheckSession(dc.AllData, db))
+	r.POST("/savedata", middleware.CheckSession(dc.SaveData, db))
+	r.POST("/updatedata", middleware.CheckSession(dc.UpdateData, db))
+
+
+	mode, dExists := os.LookupEnv("DEPLOY_MODE")
+	if !dExists {
+		log.Println("Cannot get DEPLOY_MODE env")
+	}
+
+	log.Println("DP", mode)
+
+	var handler http.Handler
+
+	if mode == "development" {
+		handler = &middleware.Logger{Handler: r}
+	} else {
+		handler = r
+	}
 
 	log.Println("Listening on 5000")
-	log.Fatal(http.ListenAndServe(":5000", r))
+	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 
 func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
