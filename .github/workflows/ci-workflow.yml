@@ -1,0 +1,13 @@
+name: Go Starter
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - id: buildStep
+        uses: actions/checkout@v2
+        run: docker-compose up --build
+      - id: testStep
+        run: go test __tests__/parse_date_test.go

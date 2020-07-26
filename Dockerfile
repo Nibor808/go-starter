@@ -17,7 +17,6 @@ FROM alpine:latest
 WORKDIR /root/
 
 COPY --from=0 /go-starter/app .
-COPY --from=0 /go-starter/.env .
 
 RUN mkdir -p ./view
 COPY --from=0 /go-starter/view/index.html ./view
