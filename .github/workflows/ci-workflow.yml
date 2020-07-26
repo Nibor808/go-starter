@@ -6,7 +6,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - id: buildStep
-        run: docker-compose up --build
-      - id: testStep
+      - uses: actions/checkout@v2
+      - name: testStep
         run: go test __tests__/parse_date_test.go
