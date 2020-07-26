@@ -7,6 +7,8 @@ services:
       context: .
     volumes:
       - .:/go-starter
+    environment:
+      - DEPLOY_MODE=development
     env_file:
       - ./.env
     ports:
