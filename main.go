@@ -43,18 +43,15 @@ func main() {
 	r.GET("/users", middleware.CheckSession(uc.AllUsers, db))
 	r.GET("/user", middleware.CheckSession(uc.User, db))
 
-	/* FORM */
+	/* DATA */
 	r.GET("/alldata", middleware.CheckSession(dc.AllData, db))
 	r.POST("/savedata", middleware.CheckSession(dc.SaveData, db))
 	r.POST("/updatedata", middleware.CheckSession(dc.UpdateData, db))
-
 
 	mode, dExists := os.LookupEnv("DEPLOY_MODE")
 	if !dExists {
 		log.Println("Cannot get DEPLOY_MODE env")
 	}
-
-	log.Println("DP", mode)
 
 	var handler http.Handler
 

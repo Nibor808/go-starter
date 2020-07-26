@@ -11,22 +11,22 @@
 
   <h3>Adding a user</h3>
   <ul>
-    <li>first make a POST request to localhost:8080/signupemail with form value for email</li>
+    <li>first make a POST request to localhost:5000/signupemail with form value for email</li>
     <li>click link in verification email to remove the token and confirm the email given</li>
-    <li>then make A POST request to localhost:8080/signuppassword with a form value for password</li>
+    <li>then make A POST request to localhost:5000/signuppassword with a form value for password</li>
   </ul>
 
   <h3>Sign In/Out</h3>
 
-  <p>Sign out at localhost:8080/signout</p>
-  <p>Sign in at localhost:8080/signin with form values for email and password</p>
+  <p>Sign out at localhost:5000/signout</p>
+  <p>Sign in at localhost:5000/signin with form values for email and password</p>
 
   <p>If signed in:</p>
   <ul>
-    <li>View all users at localhost:8080/users</li>
-    <li>View the current user at localhost:8080/user</li>
+    <li>View all users at localhost:5000/users</li>
+    <li>View the current user at localhost:5000/user</li>
   </ul>
 
-  <p>Tokens and Sessions expire after 60 seconds - this can be changed in utils/db.go -> ttl := int32(60)</p>
+  <p>Tokens and Sessions expire after 60 seconds - this can be changed in utils/db.go -> line:52 -> ttl := int32(60)</p>
 </body>
 </html>
