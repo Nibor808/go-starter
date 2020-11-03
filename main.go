@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
+	"github.com/julienschmidt/httprouter"
 	"go-starter/controller"
 	"go-starter/middleware"
 	"go-starter/utils"
@@ -8,9 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
-	"github.com/julienschmidt/httprouter"
 )
 
 var tpl *template.Template

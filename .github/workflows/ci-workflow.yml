@@ -8,4 +8,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: testStep
-        run: go test __tests__/parse_date_test.go
+        run: go test __tests__/*
