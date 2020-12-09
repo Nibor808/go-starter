@@ -29,8 +29,16 @@ func NewAuthController(db *mongo.Database) *AuthController {
 func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
+	email := r.FormValue("email")
+
 	u := model.User{
-		Email: r.FormValue("email"),
+		Email: email,
+	}
+
+	isValid := utils.CheckValidEmail(email)
+	if !isValid {
+		http.Error(w, "Invalid Email", http.StatusInternalServerError)
+		return
 	}
 
 	userResult, err := ac.db.Collection("users").InsertOne(context.TODO(), u)
@@ -75,7 +83,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 			}
 		}
 
-		mailSent := utils.SendMail("Go Starter", r.FormValue("email"), htmlText.String())
+		mailSent := utils.SendMail("Go Starter", email, htmlText.String())
 
 		if mailSent {
 			if uId, ok := userResult.InsertedID.(primitive.ObjectID); ok {

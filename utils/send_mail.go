@@ -2,21 +2,22 @@ package utils
 
 import (
 	"fmt"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"log"
 	"os"
+
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func SendMail(subject string, toEmail string, html string) bool {
 	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
 	if !sEExists {
-		log.Fatal("Cannot get Support email")
+		log.Fatal("Cannot get ADMIN_EMAIL")
 	}
 
 	apiKey, kExists := os.LookupEnv("SENDGRID_API_KEY")
 	if !kExists {
-		log.Fatal("No api key for sendgrid")
+		log.Fatal("Cannot get SENDGRID_API_KEY")
 	}
 
 	to := mail.NewEmail("", toEmail)
