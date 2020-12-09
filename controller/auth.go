@@ -6,6 +6,7 @@ import (
 	"go-starter/model"
 	"go-starter/utils"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -34,9 +35,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 
 	userResult, err := ac.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
-		var merr mongo.WriteException
-
-		merr = err.(mongo.WriteException)
+		var merr = err.(mongo.WriteException)
 		errCode := merr.WriteErrors[0].Code
 
 		if errCode == 11000 {
@@ -60,13 +59,19 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 			return
 		}
 
+		dev_url, exists := os.LookupEnv("DEV_URL")
+		if !exists {
+			http.Error(w, "Cannot find DEV_URL", http.StatusInternalServerError)
+			return
+		}
+
 		if tId, ok := tokenResult.InsertedID.(primitive.ObjectID); ok {
 			if uId, ok := userResult.InsertedID.(primitive.ObjectID); ok {
 				htmlText.WriteString("Welcome To Go Starter! Follow " +
-					"the <a href=http://localhost:8080/confirmemail/" +
+					"the <a href=" + dev_url + "/confirmemail/" +
 					tId.Hex() + "/" + uId.Hex() + ">Link</a> or paste " +
-					"this into your browser's address bar: localhost:8080/" +
-					tId.Hex() + "/" + uId.Hex())
+					"this into your browser's address bar: " + dev_url +
+					"/confirmemail/" + tId.Hex() + "/" + uId.Hex())
 			}
 		}
 
@@ -189,7 +194,7 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 
 	err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
-		http.Error(w, "username and/or password incorrect", http.StatusUnauthorized)
+		http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
 		return
 	} else {
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass)); err != nil {

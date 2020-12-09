@@ -3,13 +3,14 @@ package utils
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
-	"os"
-	"time"
 )
 
 func GetMongoSession() *mongo.Database {
@@ -23,7 +24,8 @@ func GetMongoSession() *mongo.Database {
 		log.Fatal("Missing db name from .env")
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbConn))
 	if err != nil {
@@ -49,7 +51,7 @@ func GetMongoSession() *mongo.Database {
 		log.Fatalln(err)
 	}
 
-	ttl := int32(60)
+	ttl := int32(600)
 	tokenIndex, err := db.Collection("tokens").Indexes().CreateOne(
 		context.Background(),
 		mongo.IndexModel{

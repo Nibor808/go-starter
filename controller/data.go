@@ -3,13 +3,14 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
 	"go-starter/model"
+	"log"
+	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-	"net/http"
 )
 
 type DataController struct {
