@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestParseDate(t *testing.T) {
 	date := ParseDate("2006-01-02T15:04:05.000Z")

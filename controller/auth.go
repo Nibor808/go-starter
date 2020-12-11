@@ -91,7 +91,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 				http.SetCookie(w, c)
 
 				w.WriteHeader(http.StatusCreated)
-				_, err := w.Write([]byte("Email sent"))
+				_, err := w.Write([]byte("Email sent to " + email))
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return

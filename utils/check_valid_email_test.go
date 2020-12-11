@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestCheckValidEmail(t *testing.T) {
 	validEmail := "test@gmail.com"
