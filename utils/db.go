@@ -13,15 +13,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+// GetMongoSession returns the database client
 func GetMongoSession() *mongo.Database {
 	dbConn, connExists := os.LookupEnv("DB_CONN")
 	if !connExists {
-		log.Fatal("Missing db connection string from .env")
+		log.Fatal("Cannot get DB_CONN from .env")
 	}
 
 	dbName, nameExists := os.LookupEnv("DB_NAME")
 	if !nameExists {
-		log.Fatal("Missing db name from .env")
+		log.Fatal("Cannot get DB_NAME from .env")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -39,6 +40,12 @@ func GetMongoSession() *mongo.Database {
 		log.Fatalln(err)
 	}
 
+	/*
+		Create indexes for
+		email: unique
+		token: ttl
+		session: lastActive
+	*/
 	opts := options.CreateIndexes().SetMaxTime(2 * time.Second)
 
 	emailIndex, err := db.Collection("users").Indexes().CreateOne(

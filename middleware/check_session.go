@@ -2,14 +2,18 @@ package middleware
 
 import (
 	"context"
-	"github.com/julienschmidt/httprouter"
 	"go-starter/model"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// CheckSession checks that that cookie exists
+// returns the handler function given
+// updates the cookie lastActive if it exists
 func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		sess := model.Session{}

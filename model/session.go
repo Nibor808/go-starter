@@ -1,11 +1,10 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
+// Session is ...
 type Session struct {
-	Id         string      `bson:"_id"`
+	ID         string      `bson:"_id"`
 	User       interface{} `bson:"user"`
 	LastActive time.Time   `bson:"lastActive"`
 }

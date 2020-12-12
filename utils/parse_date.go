@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// ParseDate parses a date string
+// eg "2006-01-02T15:04:05.000Z"
+// into "Monday January 2 2006"
 func ParseDate(d string) string {
 	layout := "2006-01-02T15:04:05.000Z"
 

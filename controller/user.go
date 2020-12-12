@@ -51,7 +51,7 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 	}
 }
 
-// User returns the user info from the current session
+// User returns the user info from the current session using values from the cookie
 func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
