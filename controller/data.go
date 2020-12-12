@@ -13,14 +13,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// DataController is ...
 type DataController struct {
 	db *mongo.Database
 }
 
+// NewDataController is ...
 func NewDataController(db *mongo.Database) *DataController {
 	return &DataController{db}
 }
 
+// AllData returns all saved data as json
 func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
@@ -54,6 +57,7 @@ func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 }
 
+// SaveData saves jason data to the database
 func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
@@ -72,8 +76,8 @@ func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ http
 	}
 
 	w.WriteHeader(http.StatusOK)
-	if fId, ok := formResult.InsertedID.(primitive.ObjectID); ok {
-		data.Id = fId
+	if fID, ok := formResult.InsertedID.(primitive.ObjectID); ok {
+		data.ID = fID
 
 		if err = json.NewEncoder(w).Encode(data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,6 +86,7 @@ func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ http
 	}
 }
 
+// UpdateData updates exsiting data wiht given values
 func (dc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
@@ -94,7 +99,7 @@ func (dc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ ht
 	}
 
 	result, err := dc.db.Collection("data").UpdateOne(context.TODO(),
-		bson.M{"_id": data.Id},
+		bson.M{"_id": data.ID},
 		bson.M{"$set": bson.M{"values": data.Values}})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -108,6 +113,6 @@ func (dc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ ht
 			return
 		}
 	} else {
-		http.Error(w, "Data not updated", http.StatusInternalServerError)
+		http.Error(w, "Unabled to update. Data not found.", http.StatusInternalServerError)
 	}
 }

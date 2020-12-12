@@ -9,15 +9,16 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+// SendMail gets values from env and sends an email
 func SendMail(subject string, toEmail string, html string) bool {
 	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
 	if !sEExists {
-		log.Fatal("Cannot get ADMIN_EMAIL")
+		log.Fatal("Cannot get ADMIN_EMAIL from .env")
 	}
 
 	apiKey, kExists := os.LookupEnv("SENDGRID_API_KEY")
 	if !kExists {
-		log.Fatal("Cannot get SENDGRID_API_KEY")
+		log.Fatal("Cannot get SENDGRID_API_KEY from .env")
 	}
 
 	to := mail.NewEmail("", toEmail)

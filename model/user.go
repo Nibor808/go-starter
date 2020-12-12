@@ -1,7 +1,8 @@
 package model
 
+// User is ...
 type User struct {
-	Id            string `json:"id,omitempty" bson:"_id,omitempty"`
+	ID            string `json:"id,omitempty" bson:"_id,omitempty"`
 	Email         string `json:"email" bson:"email"`
 	Password      string `json:"password" bson:"password"`
 	IsActive      bool   `json:"isActive" bson:"isActive"`

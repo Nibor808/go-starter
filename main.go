@@ -50,7 +50,7 @@ func main() {
 
 	mode, dExists := os.LookupEnv("DEPLOY_MODE")
 	if !dExists {
-		log.Println("Cannot get DEPLOY_MODE env")
+		log.Println("Cannot get DEPLOY_MODE from .env")
 	}
 
 	var handler http.Handler

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Logger is ...
 type Logger struct {
 	Handler http.Handler
 }

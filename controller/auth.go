@@ -17,15 +17,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// AuthController is ...
 type AuthController struct {
 	db *mongo.Database
 }
 
+// NewAuthController is ...
 func NewAuthController(db *mongo.Database) *AuthController {
 	return &AuthController{db}
 }
 
-/* create user with email from a form and send verification email */
+// SignUpEmail checks for email validity
+// checks that email is unique
+// creates a user with the email given
+// sends a verification email
 func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -49,61 +54,63 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 		if errCode == 11000 {
 			http.Error(w, "That email is already in use", http.StatusConflict)
 			return
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var htmlText strings.Builder
+
+	t := model.Token{
+		UserID:       userResult.InsertedID,
+		CreationTime: time.Now(),
+	}
+
+	tokenResult, err := ac.db.Collection("tokens").InsertOne(context.TODO(), t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	devURL, exists := os.LookupEnv("DEV_URL")
+	if !exists {
+		http.Error(w, "Cannot get DEV_URL from .env", http.StatusInternalServerError)
+		return
+	}
+
+	if tID, ok := tokenResult.InsertedID.(primitive.ObjectID); ok {
+		if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
+			htmlText.WriteString("Welcome To Go Starter! Follow " +
+				"the <a href=" + devURL + "/confirmemail/" +
+				tID.Hex() + "/" + uID.Hex() + ">Link</a> or paste " +
+				"this into your browser's address bar: " + devURL +
+				"/confirmemail/" + tID.Hex() + "/" + uID.Hex())
+		}
+	}
+
+	mailSent := utils.SendMail("Go Starter", email, htmlText.String())
+
+	if mailSent {
+		if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
+			c := CreateSession(w, uID, ac)
+			http.SetCookie(w, c)
+
+			w.WriteHeader(http.StatusCreated)
+			_, err := w.Write([]byte("Email sent to " + email))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	} else {
-		var htmlText strings.Builder
-
-		t := model.Token{
-			UserID:       userResult.InsertedID,
-			CreationTime: time.Now(),
-		}
-
-		tokenResult, err := ac.db.Collection("tokens").InsertOne(context.TODO(), t)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		dev_url, exists := os.LookupEnv("DEV_URL")
-		if !exists {
-			http.Error(w, "Cannot find DEV_URL", http.StatusInternalServerError)
-			return
-		}
-
-		if tId, ok := tokenResult.InsertedID.(primitive.ObjectID); ok {
-			if uId, ok := userResult.InsertedID.(primitive.ObjectID); ok {
-				htmlText.WriteString("Welcome To Go Starter! Follow " +
-					"the <a href=" + dev_url + "/confirmemail/" +
-					tId.Hex() + "/" + uId.Hex() + ">Link</a> or paste " +
-					"this into your browser's address bar: " + dev_url +
-					"/confirmemail/" + tId.Hex() + "/" + uId.Hex())
-			}
-		}
-
-		mailSent := utils.SendMail("Go Starter", email, htmlText.String())
-
-		if mailSent {
-			if uId, ok := userResult.InsertedID.(primitive.ObjectID); ok {
-				c := CreateSession(w, uId, ac)
-				http.SetCookie(w, c)
-
-				w.WriteHeader(http.StatusCreated)
-				_, err := w.Write([]byte("Email sent to " + email))
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-			}
-		} else {
-			http.Error(w, "Email not sent", http.StatusInternalServerError)
-		}
+		http.Error(w, "Email not sent", http.StatusInternalServerError)
 	}
 }
 
-/* confirm verification email and delete Token, delete user if token has expired */
+// ConfirmEmail confirms the verification email
+// and deletes the Token,
+// deletes the user if the token has expired
 func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -123,12 +130,26 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 	}
 
 	err = ac.db.Collection("tokens").FindOneAndDelete(context.TODO(), bson.M{"_id": token}).Decode(&deletedDoc)
-	if err != nil {
-		http.Error(w, "Token expired. Sign up again.", http.StatusUnauthorized)
+	if err != nil { // no token
+		http.Error(w, "Token expired.", http.StatusUnauthorized)
 
-		err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
-		if err != nil {
-			http.Error(w, "Unable to delete user", http.StatusUnauthorized)
+		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
+		if err != nil { // no user
+			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\"}.", http.StatusUnauthorized)
+			return
+		} else if len(user.Password) == 0 { // no token / have user / no password
+			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\"}.", http.StatusUnauthorized)
+
+			// delete user so sign up can proceed again without unique email conflict
+			err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
+			if err != nil {
+				http.Error(w, "Unable to delete user", http.StatusUnauthorized)
+			}
+
+			return
+		} else {
+			// no token / have user / have password
+			http.Error(w, "User is already signed up. Go ahead and sign in.", http.StatusUnauthorized)
 			return
 		}
 	} else {
@@ -139,7 +160,7 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("Email verified"))
+		_, err = w.Write([]byte("Email verified. Go ahead and save a password at /signuppassword, { password: \"your-password\"}"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -147,7 +168,8 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 	}
 }
 
-/* collect password from a form and update user */
+// SignUpPassword collects a password from a form
+// and updates the user adding the password
 func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -192,7 +214,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-/* sign in and return user */
+// SignIn signs in and returns the user
 func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -204,29 +226,31 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 	if err != nil {
 		http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
 		return
-	} else {
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass)); err != nil {
-			http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
-			return
-		}
+	}
 
-		UserID, err := primitive.ObjectIDFromHex(user.Id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass)); err != nil {
+		http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
+		return
+	}
 
-		c := CreateSession(w, UserID, ac)
-		http.SetCookie(w, c)
+	UserID, err := primitive.ObjectIDFromHex(user.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		if err = json.NewEncoder(w).Encode(user); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	c := CreateSession(w, UserID, ac)
+	http.SetCookie(w, c)
+
+	if err = json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
-/* sign out user, delete session and reset cookie */
+// SignOut signs out the user
+// deletes the session
+// resets the cookie
 func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var result bson.M
 

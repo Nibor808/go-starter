@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// CheckValidEmail checks that email is valid based on regex
 func CheckValidEmail(email string) bool {
 	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
@@ -18,9 +19,9 @@ func CheckValidEmail(email string) bool {
 	}
 
 	parts := strings.Split(email, "@")
-	mx_records, err := net.LookupMX(parts[1])
+	mxRecords, err := net.LookupMX(parts[1])
 
-	if err != nil || len(mx_records) == 0 {
+	if err != nil || len(mxRecords) == 0 {
 		return false
 	}
 
