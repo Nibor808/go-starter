@@ -196,7 +196,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 
 	result, err := ac.db.Collection("users").UpdateOne(context.TODO(),
 		bson.M{"_id": sess.User},
-		bson.M{"$set": bson.M{"password": string(bs)}})
+		bson.M{"$set": bson.M{"password": string(bs), "isActive": true}})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
