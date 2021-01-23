@@ -1,5 +1,5 @@
 ## Go Starter
-A starter setup for a REST api in golang, mongodb, and Docker
+A starter setup for a REST api in Go, mongodb, and Docker
 
 ### Set up a Sendgrid account for sending email
 [Sendgrid](https://sendgrid.com/)
