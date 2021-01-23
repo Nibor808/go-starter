@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// CreateSession creates a Session
+// GetCookie creates a Session
 // saves it to the database
 // returns pointer to a cookie
 func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.ObjectID) *http.Cookie {
