@@ -10,4 +10,4 @@ COPY . .
 
 RUN go get github.com/githubnemo/CompileDaemon
 
-ENTRYPOINT CompileDaemon -command=./go-starter
+ENTRYPOINT CompileDaemon -log-prefix=false -command=./go-starter

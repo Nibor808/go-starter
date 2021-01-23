@@ -2,19 +2,25 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"go-starter/model"
+	"log"
 	"net/http"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreateSession creates a Session
 // saves it to the database
 // returns pointer to a cookie
-func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthController) *http.Cookie {
-	sID := createsID()
+func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.ObjectID) *http.Cookie {
+	sID, err := createSID()
+	if err != nil {
+		log.Println("error creating sID in GetCookie")
+	}
+
 	sess := createSession(sID, userID)
 	saved := saveSessionToDB(w, ac, sess)
 	c := createCookie(saved, sID)
@@ -22,13 +28,18 @@ func CreateSession(w http.ResponseWriter, userID primitive.ObjectID, ac AuthCont
 	return c
 }
 
-func createsID() uuid.UUID {
-	return uuid.NewV4()
+func createSID() (string, error) {
+	uid, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("error in genereateSid getting uuid: %w", err)
+	}
+
+	return uid.String(), nil
 }
 
-func createSession(sID uuid.UUID, userID primitive.ObjectID) model.Session {
+func createSession(sID string, userID primitive.ObjectID) model.Session {
 	sess := model.Session{
-		ID:         sID.String(),
+		ID:         sID,
 		User:       userID,
 		LastActive: time.Now(),
 	}
@@ -45,11 +56,11 @@ func saveSessionToDB(w http.ResponseWriter, ac AuthController, sess model.Sessio
 	return true
 }
 
-func createCookie(saved bool, sID uuid.UUID) *http.Cookie {
+func createCookie(saved bool, sID string) *http.Cookie {
 	if saved {
 		return &http.Cookie{
 			Name:     "go-starter",
-			Value:    sID.String(),
+			Value:    sID,
 			MaxAge:   600,
 			HttpOnly: false,
 		}

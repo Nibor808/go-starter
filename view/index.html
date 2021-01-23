@@ -13,29 +13,55 @@
     <h3>Adding a user</h3>
     <ul>
       <li>
-        make a POST request to localhost:5000/signupemail?email=your-email.com
+        make a POST request to localhost:5000/signupemail with form data { email: your-email-address }
       </li>
       <li>
         check your email for the verification and click the link
       </li>
       <li>
-        then make a POST request to localhost:5000/signuppassword?password=your-password
+        then make a POST request to localhost:5000/signuppassword with form data { password: your-password }
       </li>
     </ul>
 
     <h3>Sign In/Out</h3>
-    <p>Sign in at localhost:5000/signin?email=your-email.com&password=your-password</p>
+    <p>Sign in with make a POST request to localhost:5000/signin with form data { email: your-email-address, password: your-password }</p>
 
     <p>If signed in:</p>
     <ul>
       <li>View all users at localhost:5000/users</li>
       <li>View the current user at localhost:5000/user</li>
       <li>
-        create (localhost:5000/savedata), read (localhost:5000/alldata), and update
-        (localhost:5000/updatedata) any json data via the DataController - accepts raw json
+        create data with a POST request to localhost:5000/savedata - accepts raw json
+      <pre>
+      {
+        "values": {
+            "key1": "val1"
+        }
+      }
+      </pre>
       </li>
       <li>
-        updating data can be done by adding the "id" from the json returned by savedata to the update json
+        update data with a POST request to localhost:5000/updatedata - accepts raw json
+      <pre>
+      {
+          "id": "5f1da5bbc2e2b24edd262d34", - id is taken from the json returned by savedata
+          "values": {
+              "key1": "val1",
+              "key2": [
+                  {
+                      "name": "Mike DaRookie",
+                      "age": "45"
+                  }
+              ],
+              "key3": ["item 1", "item 2", "item 3"],
+              "key4": [10, 20, 30, 40 , 50.1, 50.2],
+              "key5": "Jane Doe"
+          }
+      }
+      </pre>
+      </li>
+      <li>
+        read data with a GET request to localhost:5000/alldata
       </li>
     </ul>
 

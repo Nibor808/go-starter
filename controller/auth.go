@@ -93,7 +93,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 
 	if mailSent {
 		if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
-			c := CreateSession(w, uID, ac)
+			c := ac.GetCookie(w, uID)
 			http.SetCookie(w, c)
 
 			w.WriteHeader(http.StatusCreated)
@@ -182,7 +182,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	bs, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.MinCost)
+	bs, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -239,7 +239,7 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 		return
 	}
 
-	c := CreateSession(w, UserID, ac)
+	c := ac.GetCookie(w, UserID)
 	http.SetCookie(w, c)
 
 	if err = json.NewEncoder(w).Encode(user); err != nil {
