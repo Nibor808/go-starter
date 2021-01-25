@@ -1,10 +1,13 @@
 ## Go Starter
+
 A starter setup for a REST api in Go, mongodb, and Docker
 
 ### Set up a Sendgrid account for sending email
+
 [Sendgrid](https://sendgrid.com/)
 
 ### Add .env at project root with the following keys and add your values
+
 ```
 DB_CONN=mongodb://host.docker.internal:27017
 
@@ -17,15 +20,18 @@ SENDGRID_API_KEY=<from-your-sendgrid-account>
 ADMIN_EMAIL=<your-email>
 
 SESSION_SECRET=<whatever-you-like>
+
+JWT_KEY="whateveryoulikehere"
 ```
 
 ### Start app
-```docker-compose up --build```
+
+`docker-compose up --build`
 
 In your console you should see:
 
-```Indexes: email_1 creationTime_1 lastActive_1```
+`Indexes: email_1 creationTime_1 lastActive_1`
 
-```Connected to DATABASE: DB_NAME```
+`Connected to DATABASE: DB_NAME`
 
-Visit ```http://localhost:5000``` for instructions
+Visit `http://localhost:5000` for instructions
