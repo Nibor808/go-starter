@@ -8,6 +8,8 @@ import (
 )
 
 // Logger is ...
+// intercepts requests and
+// formats the output
 type Logger struct {
 	Handler http.Handler
 }

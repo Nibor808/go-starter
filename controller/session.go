@@ -27,11 +27,12 @@ func init() {
 }
 
 // myClaims is...
+// using ExpiresAt and Id in jwt.StandardClaims
 type myClaims struct {
 	jwt.StandardClaims
 }
 
-// Valid validates the jwt signature
+// Valid validates the JWT token
 func (c myClaims) Valid() error {
 	if !c.StandardClaims.VerifyExpiresAt(time.Now().Unix(), true) {
 		return fmt.Errorf("token has expired")
@@ -44,8 +45,9 @@ func (c myClaims) Valid() error {
 	return nil
 }
 
-// GetCookie creates a Session
-// saves it to the database
+// GetCookie creates a sID
+// creates a JWT token and a Session with the sID
+// saves the Session to the database
 // returns pointer to a cookie
 func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.ObjectID) *http.Cookie {
 	sID, err := createUID()
@@ -67,6 +69,12 @@ func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.Objec
 	return c
 }
 
+// ParseToken takes in a JWT token from a cookie
+// checks that the signing method is the same as
+// the one used to create the token
+// calls the Valid function on the verified token
+// asserts that the token.Claims are of type *myClaims
+// returns the token and an error
 func ParseToken(token string) (*myClaims, error) {
 	tokenAfter, err := jwt.ParseWithClaims(token, &myClaims{}, func(tBefore *jwt.Token) (interface{}, error) {
 		if tBefore.Method.Alg() != jwt.SigningMethodHS512.Alg() {
@@ -86,6 +94,9 @@ func ParseToken(token string) (*myClaims, error) {
 	return tokenAfter.Claims.(*myClaims), nil
 }
 
+// createJWT takes in a sID
+// creates a JWT token with the sID as jwt.StandardClaims.Id
+// returns a signed string and an error
 func createJwt(sID string) (string, error) {
 	mc := myClaims{
 		jwt.StandardClaims{
@@ -103,6 +114,7 @@ func createJwt(sID string) (string, error) {
 	return ss, nil
 }
 
+// createUID returns a new v4 uuid and an error
 func createUID() (string, error) {
 	uid, err := uuid.NewV4()
 	if err != nil {
@@ -112,6 +124,10 @@ func createUID() (string, error) {
 	return uid.String(), nil
 }
 
+// createSession takes in a sID and a user id
+// adds those values to the Session
+// sets LastActive to time.Now()
+// returns the Session
 func createSession(sID string, userID primitive.ObjectID) model.Session {
 	sess := model.Session{
 		ID:         sID,
@@ -122,6 +138,7 @@ func createSession(sID string, userID primitive.ObjectID) model.Session {
 	return sess
 }
 
+// saveSessionToDB saves the Session to the database
 func saveSessionToDB(w http.ResponseWriter, ac AuthController, sess model.Session) bool {
 	if _, err := ac.db.Collection("sessions").InsertOne(context.TODO(), sess); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -131,6 +148,10 @@ func saveSessionToDB(w http.ResponseWriter, ac AuthController, sess model.Sessio
 	return true
 }
 
+// createCookie returns a pointer to a cookie
+// with the JWT token as the value if the Session
+// was saved to the database
+// otherwise returns a pointer to a cookie with no values
 func createCookie(saved bool, ss string) *http.Cookie {
 	if saved {
 		return &http.Cookie{

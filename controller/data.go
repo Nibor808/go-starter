@@ -57,7 +57,7 @@ func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 }
 
-// SaveData saves jason data to the database
+// SaveData saves json data to the database
 func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
@@ -86,7 +86,7 @@ func (dc DataController) SaveData(w http.ResponseWriter, r *http.Request, _ http
 	}
 }
 
-// UpdateData updates exsiting data wiht given values
+// UpdateData updates exsiting data with given values
 func (dc DataController) UpdateData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 

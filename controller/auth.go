@@ -28,9 +28,10 @@ func NewAuthController(db *mongo.Database) *AuthController {
 }
 
 // SignUpEmail checks for email validity
-// checks that email is unique
+// checks that email is doesn't already exist in the database
 // creates a user with the email given
 // sends a verification email
+// sets a cookie
 func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -109,7 +110,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 }
 
 // ConfirmEmail confirms the verification email
-// and deletes the Token,
+// deletes the Token
 // deletes the user if the token has expired
 func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -169,7 +170,8 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 }
 
 // SignUpPassword collects a password from a form
-// and updates the user adding the password
+// checks that the cookie is valid
+// updates the user by adding the hashed password
 func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
@@ -220,7 +222,9 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-// SignIn signs in and returns the user
+// SignIn signs in
+// sets a cookie
+// returns the user
 func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -255,6 +259,7 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 }
 
 // SignOut signs out the user
+// checks that the cookie is valid
 // deletes the session
 // resets the cookie
 func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

@@ -19,9 +19,9 @@ SENDGRID_API_KEY=<from-your-sendgrid-account>
 
 ADMIN_EMAIL=<your-email>
 
-SESSION_SECRET=<whatever-you-like>
+SESSION_SECRET=<anythingyoulike>
 
-JWT_KEY="whateveryoulikehere"
+JWT_KEY=<anythingyoulike>
 ```
 
 ### Start app

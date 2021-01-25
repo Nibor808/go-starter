@@ -9,7 +9,9 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-// SendMail gets values from env and sends an email
+// SendMail gets values from env
+// takes a subject, toEmail, and html string
+// sends an email and returns a bool
 func SendMail(subject string, toEmail string, html string) bool {
 	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
 	if !sEExists {

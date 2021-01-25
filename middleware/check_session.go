@@ -13,6 +13,7 @@ import (
 )
 
 // CheckSession checks that that cookie exists
+// validates the jwt token
 // returns the handler function given
 // updates the cookie lastActive if it exists
 func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
