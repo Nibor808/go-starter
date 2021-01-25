@@ -59,8 +59,13 @@ func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprout
 	sess := model.Session{}
 
 	c, _ := r.Cookie("go-starter")
+	mc, err := ParseToken(c.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
-	err := uc.db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": c.Value}).Decode(&sess)
+	err = uc.db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": mc.StandardClaims.Id}).Decode(&sess)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

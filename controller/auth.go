@@ -135,10 +135,10 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 
 		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 		if err != nil { // no user
-			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\"}.", http.StatusUnauthorized)
+			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\" }.", http.StatusUnauthorized)
 			return
 		} else if len(user.Password) == 0 { // no token / have user / no password
-			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\"}.", http.StatusUnauthorized)
+			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\" }.", http.StatusUnauthorized)
 
 			// delete user so sign up can proceed again without unique email conflict
 			err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
@@ -160,7 +160,7 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("Email verified. Go ahead and save a password at /signuppassword, { password: \"your-password\"}"))
+		_, err = w.Write([]byte("Email verified. Go ahead and save a password at /signuppassword, { password: \"your-password\" }"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -182,13 +182,19 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	mc, err := ParseToken(c.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	bs, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = ac.db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": c.Value}).Decode(&sess)
+	err = ac.db.Collection("sessions").FindOne(context.TODO(), bson.M{"_id": mc.StandardClaims.Id}).Decode(&sess)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -233,13 +239,13 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 		return
 	}
 
-	UserID, err := primitive.ObjectIDFromHex(user.ID)
+	userID, err := primitive.ObjectIDFromHex(user.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	c := ac.GetCookie(w, UserID)
+	c := ac.GetCookie(w, userID)
 	http.SetCookie(w, c)
 
 	if err = json.NewEncoder(w).Encode(user); err != nil {
@@ -259,8 +265,13 @@ func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 		http.Error(w, "Cannot get cookie", http.StatusInternalServerError)
 		return
 	}
+	mc, err := ParseToken(c.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
-	err = ac.db.Collection("sessions").FindOneAndDelete(context.TODO(), bson.M{"_id": c.Value}).Decode(&result)
+	err = ac.db.Collection("sessions").FindOneAndDelete(context.TODO(), bson.M{"_id": mc.StandardClaims.Id}).Decode(&result)
 	if err != nil {
 		http.Error(w, "Session not deleted", http.StatusInternalServerError)
 		return
