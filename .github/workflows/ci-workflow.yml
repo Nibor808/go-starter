@@ -1,5 +1,4 @@
 name: Go Starter Tests
-
 on: [push, pull_request]
 
 jobs:
