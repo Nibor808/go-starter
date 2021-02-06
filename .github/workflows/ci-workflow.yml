@@ -1,11 +1,18 @@
-name: go-starter-tests
+name: Go Starter Tests
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: run tests
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.x
+
+      - name: Checkout Code
         uses: actions/checkout@v2
+
+      - name: run tests
         run: go test __tests__/*
