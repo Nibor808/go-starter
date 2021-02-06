@@ -1,4 +1,4 @@
-name: Go Starter
+name: go-starter-tests
 
 on: [push, pull_request]
 
@@ -6,6 +6,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: testStep
+      - name: run tests
+        uses: actions/checkout@v2
         run: go test __tests__/*
