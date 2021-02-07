@@ -2,32 +2,28 @@ package utils
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-// SendMail gets values from env
-// takes a subject, toEmail, and html string
-// sends an email and returns a bool
-func SendMail(subject string, toEmail string, html string) bool {
-	adminEmail, sEExists := os.LookupEnv("ADMIN_EMAIL")
-	if !sEExists {
-		log.Fatal("Cannot get ADMIN_EMAIL from .env")
+// MailArgs is ...
+type MailArgs struct {
+	AdminEmail string
+	APIKey     string
+	Subject    string
+	To         string
+	HTML       string
+}
+
+// SendMail sends an email and returns a error
+func SendMail(args MailArgs) error {
+	message, err := MessageConfig(args)
+	if err != nil {
+		return fmt.Errorf("%w", err)
 	}
 
-	apiKey, kExists := os.LookupEnv("SENDGRID_API_KEY")
-	if !kExists {
-		log.Fatal("Cannot get SENDGRID_API_KEY from .env")
-	}
-
-	to := mail.NewEmail("", toEmail)
-	from := mail.NewEmail("Go Starter", adminEmail)
-
-	message := mail.NewSingleEmail(from, subject, to, html, html)
-	client := sendgrid.NewSendClient(apiKey)
+	client := sendgrid.NewSendClient(args.APIKey)
 
 	if res, err := client.Send(message); err != nil {
 		fmt.Println("Failed to send email:", err)
@@ -35,8 +31,21 @@ func SendMail(subject string, toEmail string, html string) bool {
 		fmt.Println("BODY:", res.Body)
 		fmt.Println("Headers:", res.Headers)
 
-		return false
+		return fmt.Errorf("Unable to send email: %w", err)
 	}
 
-	return true
+	return nil
+}
+
+// MessageConfig sets up the message
+func MessageConfig(args MailArgs) (*mail.SGMailV3, error) {
+	to := mail.NewEmail("", args.To)
+	from := mail.NewEmail(args.Subject, args.AdminEmail)
+	message := mail.NewSingleEmail(from, args.Subject, to, args.HTML, args.HTML)
+
+	if message.Subject == args.Subject && len(message.Content) == 2 {
+		return message, nil
+	}
+
+	return nil, fmt.Errorf("Unable to configure message")
 }

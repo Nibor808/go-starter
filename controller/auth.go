@@ -6,7 +6,6 @@ import (
 	"go-starter/model"
 	"go-starter/utils"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -28,7 +27,7 @@ func NewAuthController(db *mongo.Database) *AuthController {
 }
 
 // SignUpEmail checks for email validity
-// checks that email is doesn't already exist in the database
+// checks that email doesn't already exist in the database
 // creates a user with the email given
 // sends a verification email
 // sets a cookie
@@ -47,6 +46,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 		return
 	}
 
+	// go ahead and insert the new user
 	userResult, err := ac.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
 		var merr = err.(mongo.WriteException)
@@ -61,8 +61,6 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 		return
 	}
 
-	var htmlText strings.Builder
-
 	t := model.Token{
 		UserID:       userResult.InsertedID,
 		CreationTime: time.Now(),
@@ -74,38 +72,48 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 		return
 	}
 
-	devURL, exists := os.LookupEnv("DEV_URL")
-	if !exists {
-		http.Error(w, "Cannot get DEV_URL from .env", http.StatusInternalServerError)
+	keys, err := utils.GetKeys()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	var htmlText strings.Builder
 
 	if tID, ok := tokenResult.InsertedID.(primitive.ObjectID); ok {
 		if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
 			htmlText.WriteString("Welcome To Go Starter! Follow " +
-				"the <a href=" + devURL + "/confirmemail/" +
+				"the <a href=" + keys.DevURL + "/confirmemail/" +
 				tID.Hex() + "/" + uID.Hex() + ">Link</a> or paste " +
-				"this into your browser's address bar: " + devURL +
+				"this into your browser's address bar: " + keys.DevURL +
 				"/confirmemail/" + tID.Hex() + "/" + uID.Hex())
 		}
 	}
 
-	mailSent := utils.SendMail("Go Starter", email, htmlText.String())
+	mailArgs := utils.MailArgs{
+		AdminEmail: keys.AdminEmail,
+		APIKey:     keys.APIKey,
+		Subject:    "Go Starter",
+		To:         email,
+		HTML:       htmlText.String(),
+	}
 
-	if mailSent {
-		if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
-			c := ac.GetCookie(w, uID)
-			http.SetCookie(w, c)
+	err = utils.SendMail(mailArgs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-			w.WriteHeader(http.StatusCreated)
-			_, err := w.Write([]byte("Email sent to " + email))
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+	if uID, ok := userResult.InsertedID.(primitive.ObjectID); ok {
+		c := ac.GetCookie(w, uID)
+		http.SetCookie(w, c)
+
+		w.WriteHeader(http.StatusCreated)
+		_, err := w.Write([]byte("Email sent to " + email))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-	} else {
-		http.Error(w, "Email not sent", http.StatusInternalServerError)
 	}
 }
 
