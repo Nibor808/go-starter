@@ -1,6 +1,6 @@
 ## Go Starter
 
-A starter setup for a REST api in Go, mongodb, and Docker
+A starter setup for a REST api in Go, MongoDB, and Docker
 
 ### Set up a Sendgrid account for sending email
 
@@ -33,5 +33,7 @@ In your console you should see:
 `Indexes: email_1 creationTime_1 lastActive_1`
 
 `Connected to DATABASE: DB_NAME`
+
+`Listening on 5000`
 
 Visit `http://localhost:5000` for instructions

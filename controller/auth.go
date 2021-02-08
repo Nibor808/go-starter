@@ -49,7 +49,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 	// go ahead and insert the new user
 	userResult, err := ac.db.Collection("users").InsertOne(context.TODO(), u)
 	if err != nil {
-		var merr = err.(mongo.WriteException)
+		merr := err.(mongo.WriteException)
 		errCode := merr.WriteErrors[0].Code
 
 		if errCode == 11000 {
@@ -142,7 +142,7 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 	if err != nil { // no token
 		http.Error(w, "Token expired.", http.StatusUnauthorized)
 
-		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
+		err = ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 		if err != nil { // no user
 			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\" }.", http.StatusUnauthorized)
 			return
@@ -162,7 +162,7 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 			return
 		}
 	} else {
-		err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
+		err = ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 		if err != nil {
 			http.Error(w, "User not found", http.StatusUnauthorized)
 			return
@@ -220,7 +220,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 
 	if result.MatchedCount != 0 {
 		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte("Password confirmed. User updated."))
+		_, err = w.Write([]byte("Password confirmed. User updated."))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

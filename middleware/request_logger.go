@@ -8,12 +8,12 @@ import (
 )
 
 // Logger is ...
-// intercepts requests and
-// formats the output
 type Logger struct {
 	Handler http.Handler
 }
 
+// intercepts requests and
+// formats the output
 func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.SetOutput(os.Stdout)
 

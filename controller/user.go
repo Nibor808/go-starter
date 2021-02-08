@@ -28,20 +28,20 @@ func (uc UserController) AllUsers(w http.ResponseWriter, _ *http.Request, _ http
 
 	var results []model.User
 
-	cursor, findError := uc.db.Collection("users").Find(context.TODO(), bson.D{{}})
-	if findError != nil {
-		http.Error(w, findError.Error(), http.StatusInternalServerError)
+	cursor, err := uc.db.Collection("users").Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	defer func() {
-		if cerr := cursor.Close(context.TODO()); cerr != nil {
-			log.Fatal("User cursor.Close error:", cerr)
+		if err := cursor.Close(context.TODO()); err != nil {
+			log.Fatal("User cursor.Close error:", err)
 		}
 	}()
 
-	if cursorErr := cursor.All(context.TODO(), &results); cursorErr != nil {
-		http.Error(w, cursorErr.Error(), http.StatusInternalServerError)
+	if err := cursor.All(context.TODO(), &results); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

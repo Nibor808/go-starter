@@ -21,7 +21,7 @@ func TestCheckValidEmail(t *testing.T) {
 	fails := []string{"testemail.ca", "test@emailca", "test@email", "test@email.commm"}
 
 	for _, email := range fails {
-		isValid := utils.CheckValidEmail(email)
+		isValid = utils.CheckValidEmail(email)
 
 		assert.Equal(t, isValid, false)
 	}
