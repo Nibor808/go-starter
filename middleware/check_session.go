@@ -24,23 +24,23 @@ func CheckSession(h httprouter.Handle, db *mongo.Database) httprouter.Handle {
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
-		} else {
-			mc, err := controller.ParseToken(c.Value)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
-				return
-			}
-
-			err = db.Collection("sessions").FindOneAndUpdate(
-				context.TODO(),
-				bson.M{"_id": mc.StandardClaims.Id},
-				bson.M{"$set": bson.M{"lastActive": time.Now()}}).Decode(&sess)
-			if err != nil {
-				http.Error(w, "Session expired", http.StatusUnauthorized)
-				return
-			}
-
-			h(w, r, p)
 		}
+
+		mc, err := controller.ParseToken(c.Value)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+
+		err = db.Collection("sessions").FindOneAndUpdate(
+			context.TODO(),
+			bson.M{"_id": mc.StandardClaims.Id},
+			bson.M{"$set": bson.M{"lastActive": time.Now()}}).Decode(&sess)
+		if err != nil {
+			http.Error(w, "Session expired", http.StatusUnauthorized)
+			return
+		}
+
+		h(w, r, p)
 	}
 }

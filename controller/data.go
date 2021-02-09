@@ -47,7 +47,7 @@ func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 
 	if len(data) <= 0 {
-		http.Error(w, "No data available.", http.StatusInternalServerError)
+		http.Error(w, "No data available.", http.StatusNoContent)
 		return
 	}
 

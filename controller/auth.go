@@ -42,7 +42,7 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 
 	isValid := utils.CheckValidEmail(email)
 	if !isValid {
-		http.Error(w, "Invalid Email", http.StatusInternalServerError)
+		http.Error(w, "Invalid Email", http.StatusBadRequest)
 		return
 	}
 
@@ -153,13 +153,13 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 			// delete user so sign up can proceed again without unique email conflict
 			err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
 			if err != nil {
-				http.Error(w, "Unable to delete user", http.StatusUnauthorized)
+				http.Error(w, "Unable to delete user", http.StatusInternalServerError)
 			}
 
 			return
 		} else {
 			// no token / have user / have password
-			http.Error(w, "User is already signed up. Go ahead and sign in.", http.StatusUnauthorized)
+			http.Error(w, "User is already signed up. Go ahead and sign in.", http.StatusConflict)
 			return
 		}
 	} else {
@@ -195,7 +195,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 
 	mc, err := ParseToken(c.Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 
@@ -243,12 +243,12 @@ func (ac AuthController) SignIn(w http.ResponseWriter, r *http.Request, _ httpro
 
 	err := ac.db.Collection("users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
-		http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
+		http.Error(w, "Incorrect login info", http.StatusUnauthorized)
 		return
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass)); err != nil {
-		http.Error(w, "Username and/or password incorrect", http.StatusUnauthorized)
+		http.Error(w, "Incorrect login info", http.StatusUnauthorized)
 		return
 	}
 
@@ -281,7 +281,7 @@ func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 	mc, err := ParseToken(c.Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 

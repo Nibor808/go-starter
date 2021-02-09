@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"go-starter/model"
+	"go-starter/utils"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -18,22 +18,22 @@ var jwtKey []byte
 
 // init gets the JWT_KEY from .env
 func init() {
-	key, exists := os.LookupEnv("JWT_KEY")
-	if !exists {
-		log.Println("Cannot get JWT_KEY from .env")
-	} else {
-		jwtKey = []byte(key)
+	keys, err := utils.GetKeys()
+	if err != nil {
+		log.Println(err)
 	}
+
+	jwtKey = []byte(keys.JWTKey)
 }
 
-// myClaims is...
+// MyClaims is...
 // using ExpiresAt and Id in jwt.StandardClaims
-type myClaims struct {
+type MyClaims struct {
 	jwt.StandardClaims
 }
 
 // Valid validates the JWT token
-func (c myClaims) Valid() error {
+func (c MyClaims) Valid() error {
 	if !c.StandardClaims.VerifyExpiresAt(time.Now().Unix(), true) {
 		return fmt.Errorf("token has expired")
 	}
@@ -73,10 +73,10 @@ func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.Objec
 // checks that the signing method is the same as
 // the one used to create the token
 // calls the Valid function on the verified token
-// asserts that the token.Claims are of type *myClaims
+// asserts that the token.Claims are of type *MyClaims
 // returns the token and an error
-func ParseToken(token string) (*myClaims, error) {
-	tokenAfter, err := jwt.ParseWithClaims(token, &myClaims{}, func(tBefore *jwt.Token) (interface{}, error) {
+func ParseToken(token string) (*MyClaims, error) {
+	tokenAfter, err := jwt.ParseWithClaims(token, &MyClaims{}, func(tBefore *jwt.Token) (interface{}, error) {
 		if tBefore.Method.Alg() != jwt.SigningMethodHS512.Alg() {
 			return nil, fmt.Errorf("token invalid")
 		}
@@ -91,14 +91,14 @@ func ParseToken(token string) (*myClaims, error) {
 		return nil, fmt.Errorf("token invalid: %w", err)
 	}
 
-	return tokenAfter.Claims.(*myClaims), nil
+	return tokenAfter.Claims.(*MyClaims), nil
 }
 
 // createJWT takes in a sID
 // creates a JWT token with the sID as jwt.StandardClaims.Id
 // returns a signed string and an error
 func createJwt(sID string) (string, error) {
-	mc := myClaims{
+	mc := MyClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
 			Id:        sID,

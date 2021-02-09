@@ -48,6 +48,7 @@ func main() {
 	r.POST("/savedata", middleware.CheckSession(dc.SaveData, db))
 	r.POST("/updatedata", middleware.CheckSession(dc.UpdateData, db))
 
+	// DEPLOY_MODE is defined in docker-compose.yml
 	mode, dExists := os.LookupEnv("DEPLOY_MODE")
 	if !dExists {
 		log.Println("Cannot get DEPLOY_MODE from .env")

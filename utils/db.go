@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,25 +14,20 @@ import (
 
 // GetMongoSession returns the database client
 func GetMongoSession() *mongo.Database {
-	dbConn, connExists := os.LookupEnv("DB_CONN")
-	if !connExists {
-		log.Fatal("Cannot get DB_CONN from .env")
-	}
-
-	dbName, nameExists := os.LookupEnv("DB_NAME")
-	if !nameExists {
-		log.Fatal("Cannot get DB_NAME from .env")
+	keys, err := GetKeys()
+	if err != nil {
+		log.Fatal("Cannot get keys from .env")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbConn))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(keys.DBConn))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	db := client.Database(dbName)
+	db := client.Database(keys.DBName)
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
@@ -85,7 +79,7 @@ func GetMongoSession() *mongo.Database {
 
 	fmt.Println("Indexes:", emailIndex, tokenIndex, sessionIndex)
 
-	fmt.Println("Connected to DATABASE:", dbName)
+	fmt.Println("Connected to DATABASE:", keys.DBName)
 
 	return db
 }

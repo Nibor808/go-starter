@@ -61,7 +61,7 @@ func (uc UserController) User(w http.ResponseWriter, r *http.Request, _ httprout
 	c, _ := r.Cookie("go-starter")
 	mc, err := ParseToken(c.Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 
