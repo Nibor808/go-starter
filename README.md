@@ -2,10 +2,6 @@
 
 A starter setup for a REST api in Go, MongoDB, and Docker
 
-### Set up a Sendgrid account for sending email
-
-[Sendgrid](https://sendgrid.com/)
-
 ### Add .env at project root with the following keys and add your values
 
 ```
@@ -15,13 +11,15 @@ DB_NAME=<your-database-name>
 
 DEV_URL=http://localhost:5000
 
-SENDGRID_API_KEY=<from-your-sendgrid-account>
-
-ADMIN_EMAIL=<your-email>
-
 SESSION_SECRET=<anythingyoulike>
 
 JWT_KEY=<anythingyoulike>
+
+ADMIN_EMAIL=<your-email>
+
+MAIL_PASS=<your-email-password>
+
+MAIL_HOST=<your-mail-host> eg smtp.gmail.com
 ```
 
 ### Start app

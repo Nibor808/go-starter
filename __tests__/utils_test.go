@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"go-starter/utils"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,13 +30,22 @@ func TestCheckValidEmail(t *testing.T) {
 func TestEmailMessageConfig(t *testing.T) {
 	mailArgs := utils.MailArgs{
 		AdminEmail: "test@admin.ca",
-		APIKey:     "TESTAPIKEY",
 		Subject:    "Email Test",
 		To:         "new_user@email.ca",
-		HTML:       `<div>Testing email</div>`,
+		Body:       "<div>Testing email</div>",
 	}
 
-	_, err := utils.MessageConfig(mailArgs)
+	result := string(utils.MessageConfig(mailArgs))
 
-	assert.Equal(t, err, nil)
+	hasTo := strings.Contains(result, "To: new_user@email.ca")
+	assert.Equal(t, hasTo, true)
+
+	hasSubject := strings.Contains(result, "Subject: Email Test")
+	assert.Equal(t, hasSubject, true)
+
+	hasFrom := strings.Contains(result, "From: test@admin.ca")
+	assert.Equal(t, hasFrom, true)
+
+	hasBody := strings.Contains(result, "<div>Testing email</div>")
+	assert.Equal(t, hasBody, true)
 }

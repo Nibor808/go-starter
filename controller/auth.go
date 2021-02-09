@@ -92,10 +92,11 @@ func (ac AuthController) SignUpEmail(w http.ResponseWriter, r *http.Request, _ h
 
 	mailArgs := utils.MailArgs{
 		AdminEmail: keys.AdminEmail,
-		APIKey:     keys.APIKey,
 		Subject:    "Go Starter",
 		To:         email,
-		HTML:       htmlText.String(),
+		Body:       htmlText.String(),
+		MailPass:   keys.MailPass,
+		MailHost:   keys.MailHost,
 	}
 
 	err = utils.SendMail(mailArgs)
