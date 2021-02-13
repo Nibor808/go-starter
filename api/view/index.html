@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Index</title>
+  </head>
+
+  <body>
+    <h1>Go Starter</h1>
+    <p>
+      You can use
+      <a href="https://www.postman.com/" target="_blank" rel="noreferrer">Postman</a> for making
+      requests
+    </p>
+
+    <h3>Adding a user</h3>
+    <ul>
+      <li>
+        make a POST request to localhost:5000/signupemail with form data { email:
+        your-email-address}
+      </li>
+      <li>check your email for the verification and click the link</li>
+      <li>
+        then make a POST request to localhost:5000/signuppassword with form data {
+        password:your-password }
+      </li>
+    </ul>
+
+    <h3>Sign In/Out</h3>
+    <p>
+      Sign in with make a POST request to localhost:5000/signin with form data { email:
+      your-email-address, password: your-password }
+    </p>
+
+    <p>If signed in:</p>
+    <ul>
+      <li>View all users at localhost:5000/users</li>
+      <li>View the current user at localhost:5000/user</li>
+      <li>
+        create data with a POST request to localhost:5000/savedata - accepts raw json
+        <pre>
+      {
+        "values": {
+            "key1": "val1"
+        }
+      }
+      </pre
+        >
+      </li>
+      <li>
+        update data with a POST request to localhost:5000/updatedata - accepts raw json
+        <pre>
+      {
+          "id": "5f1da5bbc2e2b24edd262d34", - id is taken from the json returned by savedata
+          "values": {
+              "key1": "val1",
+              "key2": [
+                  {
+                      "name": "Mike DaRookie",
+                      "age": "45"
+                  }
+              ],
+              "key3": ["item 1", "item 2", "item 3"],
+              "key4": [10, 20, 30, 40 , 50.1, 50.2],
+              "key5": "Jane Doe"
+          }
+      }
+      </pre
+        >
+      </li>
+      <li>read data with a GET request to localhost:5000/alldata</li>
+    </ul>
+
+    <p>Sign out at localhost:5000/signout</p>
+    <p>
+      Tokens and Sessions expire after 10 minutes - this can be changed in utils/db.go -> line:54 ->
+      ttl := int32(600)
+    </p>
+
+    <p>Changes to html require a manual restart</p>
+  </body>
+</html>

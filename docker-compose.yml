@@ -1,15 +1,33 @@
-version: "3"
+version: '3'
 
 services:
+  client:
+    stdin_open: true # to fix bug in create-react-app
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+
   api:
     build:
       dockerfile: Dockerfile.dev
-      context: .
+      context: ./api
     volumes:
-      - .:/go-starter
+      - ./api:/go-starter
     environment:
       - DEPLOY_MODE=development
     env_file:
-      - ./.env
+      - ./api/.env
+
+  nginx:
+    depends_on:
+      - client
+      - api
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
     ports:
-    - 5000:5000
+      - 3000:80
