@@ -34,7 +34,7 @@ func main() {
 
 	/* AUTH */
 	r.POST("/signupemail", ac.SignUpEmail)
-	r.GET("/confirmemail/:token/:userID", ac.ConfirmEmail)
+	r.GET("/confirmemaildata/:token/:userID", ac.ConfirmEmail)
 	r.POST("/signuppassword", middleware.CheckSession(ac.SignUpPassword, db))
 	r.POST("/signin", ac.SignIn)
 	r.GET("/signout", ac.SignOut)

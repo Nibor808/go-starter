@@ -139,42 +139,34 @@ func (ac AuthController) ConfirmEmail(w http.ResponseWriter, _ *http.Request, p 
 		return
 	}
 
-	err = ac.db.Collection("tokens").FindOneAndDelete(context.TODO(), bson.M{"_id": token}).Decode(&deletedDoc)
-	if err != nil { // no token
-		http.Error(w, "Token expired.", http.StatusUnauthorized)
-
+	deleteResult, _ := ac.db.Collection("tokens").DeleteOne(context.TODO(), bson.M{"_id": token})
+	if deleteResult.DeletedCount == 0 { // no token
 		err = ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 		if err != nil { // no user
-			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\" }.", http.StatusUnauthorized)
+			http.Error(w, "Link expired. Sign up again.", http.StatusUnauthorized)
 			return
-		} else if len(user.Password) == 0 { // no token / have user / no password
-			http.Error(w, "Link expired. Sign up at /signupemail, { email: \"your-email\" }.", http.StatusUnauthorized)
-
+		} else if len(user.Password) == 0 { // have user / no password
 			// delete user so sign up can proceed again without unique email conflict
 			err = ac.db.Collection("users").FindOneAndDelete(context.TODO(), bson.M{"_id": userID}).Decode(&deletedDoc)
 			if err != nil {
 				http.Error(w, "Unable to delete user", http.StatusInternalServerError)
+				return
 			}
 
+			http.Error(w, "Link expired. Sign up again.", http.StatusUnauthorized)
 			return
-		} else {
+		} else if len(user.Password) > 0 {
 			// no token / have user / have password
 			http.Error(w, "User is already signed up. Go ahead and sign in.", http.StatusConflict)
 			return
 		}
-	} else {
-		err = ac.db.Collection("users").FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
-		if err != nil {
-			http.Error(w, "User not found", http.StatusUnauthorized)
-			return
-		}
+	}
 
-		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("Email verified. Go ahead and save a password at /signuppassword, { password: \"your-password\" }"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte("Email verified. Go ahead and save enter a password."))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -227,7 +219,7 @@ func (ac AuthController) SignUpPassword(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 	} else {
-		http.Error(w, "User not updated", http.StatusInternalServerError)
+		http.Error(w, "User not found", http.StatusInternalServerError)
 	}
 }
 
