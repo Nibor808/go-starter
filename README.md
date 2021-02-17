@@ -1,8 +1,8 @@
 ## Go Starter
 
-A starter setup for a REST api in Go, MongoDB, and Docker
+A starter setup for a REST api with React, Go, MongoDB, and Docker
 
-### Add .env at project root with the following keys and add your values
+### Add .env in api/ with the following keys and add your values
 
 ```
 DB_CONN=mongodb://host.docker.internal:27017
@@ -28,10 +28,16 @@ MAIL_HOST=<your-mail-host> eg smtp.gmail.com
 
 In your console you should see:
 
+api/
+
 `Indexes: email_1 creationTime_1 lastActive_1`
 
 `Connected to DATABASE: DB_NAME`
 
 `Listening on 5000`
 
-Visit `http://localhost:5000` for instructions
+client/
+
+`Compiled successfully!`
+
+Visit `http://localhost:3000` to create a user or sign in

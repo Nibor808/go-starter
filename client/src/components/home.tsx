@@ -4,7 +4,7 @@ const Home: React.FC = () => {
   return (
     <div>
       <h3>Sign in or sign up.</h3>
-      <Link to='signupemail'>sign up</Link>
+      <Link to='signupemail'>create user</Link>
 
       <Link to='signin'>sign in</Link>
     </div>
