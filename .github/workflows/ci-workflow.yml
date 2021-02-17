@@ -14,4 +14,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run tests
-        run: go test api/__tests__/*
+        run: cd api && go test __tests__/*
