@@ -2,6 +2,8 @@
 
 A starter setup for a REST api with React, Go, MongoDB, and Docker
 
+No styling or layout for client yet!
+
 ### Add .env in api/ with the following keys and add your values
 
 ```
