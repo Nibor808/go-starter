@@ -4,4 +4,4 @@
 .idea/
 .vscode/
 *.env
-/go-starter
+api/go-starter

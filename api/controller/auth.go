@@ -271,15 +271,16 @@ func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 		http.Error(w, "Cannot get cookie", http.StatusInternalServerError)
 		return
 	}
+
 	mc, err := ParseToken(c.Value)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		http.Error(w, "Session expired. Already signed out.", http.StatusUnauthorized)
 		return
 	}
 
 	err = ac.db.Collection("sessions").FindOneAndDelete(context.TODO(), bson.M{"_id": mc.StandardClaims.Id}).Decode(&result)
 	if err != nil {
-		http.Error(w, "Session not deleted", http.StatusInternalServerError)
+		http.Error(w, "Session expired", http.StatusInternalServerError)
 		return
 	}
 

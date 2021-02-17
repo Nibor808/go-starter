@@ -1,34 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 interface User {
-  Id: string;
-  Email: string;
-  Active: boolean;
-  Admin: boolean;
+  id: string;
+  email: string;
+  isActive: boolean;
+  isAdmin: boolean;
 }
 
 const Dashboard: React.FC = () => {
   const [users, setUsers] = useState<[User]>([
     {
-      Id: '',
-      Email: '',
-      Active: false,
-      Admin: false,
+      id: '',
+      email: '',
+      isActive: false,
+      isAdmin: false,
     },
   ]);
+  const [user, setUser] = useState<User>({
+    id: '',
+    email: '',
+    isActive: false,
+    isAdmin: false,
+  });
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    handleUsers();
-  }, []);
 
   const handleUsers = async () => {
     try {
       const response = await axios.get('api/users');
 
-      console.log(response);
       setUsers(response.data);
+    } catch (err) {
+      setError(err.response.data);
+    }
+  };
+
+  const handleUser = async () => {
+    try {
+      const response = await axios.get('api/user');
+
+      setUser(response.data);
     } catch (err) {
       setError(err.response.data);
     }
@@ -39,14 +50,20 @@ const Dashboard: React.FC = () => {
       <h3>Dashboard</h3>
       <p>{error}</p>
 
+      <p>All Users</p>
       <ul>
         {users.map(user => (
-          <li key={user.Id}>{user.Email}</li>
+          <li key={user.id}>{user.email}</li>
         ))}
       </ul>
 
+      <p>User From Cookie</p>
+      <ul>
+        <li>{user.email}</li>
+      </ul>
+
       <button onClick={handleUsers}>All Users</button>
-      <button>User From Cookie</button>
+      <button onClick={handleUser}>User From Cookie</button>
     </div>
   );
 };
