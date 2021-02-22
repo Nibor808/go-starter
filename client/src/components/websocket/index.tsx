@@ -18,13 +18,17 @@ const MyWebSocket: React.FC = () => {
 
   useEffect(() => {
     if (socket.current) {
-      socket.current.onopen = () => {
-        setMessage('SOCKET OPENED');
-      };
-
       socket.current.onmessage = (ev: MessageEvent) => {
         setWebsocketResponse(ev.data);
         setCounter(counter + 1);
+      };
+    }
+  }, [counter]);
+
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.onopen = () => {
+        setMessage('SOCKET OPENED');
       };
 
       socket.current.onclose = (ev: CloseEvent) => {
@@ -35,7 +39,14 @@ const MyWebSocket: React.FC = () => {
         setMessage('ERROR: ' + ev);
       };
     }
-  }, [counter]);
+
+    return () => {
+      socket.current?.close();
+      setCounter(0);
+    };
+  }, []);
+
+  useEffect(() => {}, []);
 
   const handleMessage = (ev: React.MouseEvent<HTMLButtonElement>) => {
     const elem = document.getElementById('messageInput') as HTMLInputElement;
