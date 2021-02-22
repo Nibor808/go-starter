@@ -1,15 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { IUser } from './user/interfaces';
+import Users from './user/users';
+import User from './user/user';
+import MyWebSocket from './websocket';
 import axios from 'axios';
 
-interface User {
-  id: string;
-  email: string;
-  isActive: boolean;
-  isAdmin: boolean;
-}
-
 const Dashboard: React.FC = () => {
-  const [users, setUsers] = useState<[User]>([
+  const [users, setUsers] = useState<[IUser]>([
     {
       id: '',
       email: '',
@@ -17,7 +14,8 @@ const Dashboard: React.FC = () => {
       isAdmin: false,
     },
   ]);
-  const [user, setUser] = useState<User>({
+
+  const [user, setUser] = useState<IUser>({
     id: '',
     email: '',
     isActive: false,
@@ -35,6 +33,12 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    setTimeout(() => {
+      setError('');
+    }, 2000);
+  }, [error]);
+
   const handleUser = async () => {
     try {
       const response = await axios.get('api/user');
@@ -48,22 +52,13 @@ const Dashboard: React.FC = () => {
   return (
     <div>
       <h3>Dashboard</h3>
-      <p>{error}</p>
+      {error ? <p>ERROR: {error}</p> : null}
 
-      <p>All Users</p>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.email}</li>
-        ))}
-      </ul>
+      <MyWebSocket />
 
-      <p>User From Cookie</p>
-      <ul>
-        <li>{user.email}</li>
-      </ul>
+      <Users users={users} onClick={handleUsers} />
 
-      <button onClick={handleUsers}>All Users</button>
-      <button onClick={handleUser}>User From Cookie</button>
+      <User user={user} onClick={handleUser} />
     </div>
   );
 };

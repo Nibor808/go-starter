@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 const SignUpPassword: React.FC = () => {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
   const history = useHistory();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setMessage('');
+    }, 2000);
+  }, [message]);
 
   const handleSubmit: React.FormEventHandler = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -15,12 +20,11 @@ const SignUpPassword: React.FC = () => {
     formData.append('password', password);
 
     try {
-      const response = await axios.post('api/signuppassword', formData);
+      await axios.post('api/signuppassword', formData);
 
-      setSuccess(response.data);
       history.push('dashboard');
     } catch (err) {
-      setError(err.response.data);
+      setMessage(err.response.data);
     }
   };
 
@@ -29,8 +33,7 @@ const SignUpPassword: React.FC = () => {
       <h3>Sign Up</h3>
 
       <p>Now add a password.</p>
-      <p>{error}</p>
-      <p>{success}</p>
+      {message ? <p>{message}</p> : null}
 
       <form onSubmit={handleSubmit} method='POST'>
         <label htmlFor='password'>password</label>

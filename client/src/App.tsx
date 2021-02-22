@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
@@ -26,7 +26,7 @@ const App: React.FC = props => {
     <div className='App'>
       <header className='App-header'>
         <h1>Welcome to Go Starter!</h1>
-        <p>{message}</p>
+        {message ? <p>{message}</p> : null}
         <Link to='/'>Home</Link>
         <button onClick={handleSignOut}>Sign Out</button>
 

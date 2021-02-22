@@ -1,8 +1,16 @@
-## Go Starter
+# Go Starter
 
-A starter setup for a REST api with React, Go, MongoDB, and Docker
+A starter setup for a REST api with React, Go, MongoDB, and Docker.
 
 No styling or layout for client yet!
+
+## Sessions
+
+Tokens and Sessions expire after 10 minutes.
+
+This can be changed in `api/utils/db.go line 55 -> ttl := int32(600)`
+
+Session ttl is refreshed by hitting an endpoint.
 
 ### Add .env in api/ with the following keys and add your values
 

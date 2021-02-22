@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const history = useHistory();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setMessage('');
+    }, 2000);
+  }, [message]);
 
   const handleSubmit: React.FormEventHandler = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -18,7 +24,7 @@ const SignIn: React.FC = () => {
     try {
       await axios.post('api/signin', formData).then(() => history.push('/dashboard'));
     } catch (err) {
-      setError(err.response.data);
+      setMessage(err.response.data);
     }
   };
 
@@ -26,7 +32,7 @@ const SignIn: React.FC = () => {
     <div>
       <h3>Sign In</h3>
 
-      <p>{error}</p>
+      {message ? <p>{message}</p> : null}
 
       <form onSubmit={handleSubmit}>
         <label htmlFor='email'>email</label>

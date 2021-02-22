@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const SignUpEmail: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setTimeout(() => {
+      setMessage('');
+    }, 2000);
+  }, [message]);
 
   const handleSubmit: React.FormEventHandler = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -15,9 +20,9 @@ const SignUpEmail: React.FC = () => {
     try {
       const response = await axios.post('api/signupemail', formData);
 
-      setSuccess(response.data);
+      setMessage(response.data);
     } catch (err) {
-      setError(err.response.data);
+      setMessage(err.response.data);
     }
   };
 
@@ -29,8 +34,7 @@ const SignUpEmail: React.FC = () => {
       <p>An email will be sent for you to confirm.</p>
       <p>Click on the link in the email to proceed.</p>
 
-      <p>{error}</p>
-      <p>{success}</p>
+      {message ? <p>{message}</p> : null}
 
       <form onSubmit={handleSubmit} method='POST'>
         <label htmlFor='email'>email</label>

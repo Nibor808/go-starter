@@ -1,27 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"go-starter/controller"
 	"go-starter/middleware"
 	"go-starter/utils"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/gorilla/websocket"
+
 	"github.com/julienschmidt/httprouter"
 )
-
-var tpl *template.Template
-
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No env file found")
-	}
-
-	tpl = template.Must(template.ParseFiles("./view/index.html"))
-}
 
 func main() {
 	r := httprouter.New()
@@ -30,7 +21,7 @@ func main() {
 	ac := controller.NewAuthController(db)
 	dc := controller.NewDataController(db)
 
-	r.GET("/", index)
+	r.GET("/wsconnect", handleWebSocket)
 
 	/* AUTH */
 	r.POST("/signupemail", ac.SignUpEmail)
@@ -66,12 +57,35 @@ func main() {
 	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 
-func index(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "text/html charset=utf8")
-	w.WriteHeader(http.StatusOK)
+func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var upgrader = websocket.Upgrader{}
 
-	if err := tpl.Execute(w, nil); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		if r.Header.Get("Origin") == "http://localhost:3000" {
+			return true
+		}
+
+		return false
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("ERROR: ", err)
 		return
+	}
+	defer conn.Close()
+
+	for {
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("ERROR: ", err)
+			break
+		}
+
+		err = conn.WriteMessage(mt, []byte("Server here. Message {"+string(message)+"} received!"))
+		if err != nil {
+			fmt.Println("ERROR: ", err)
+			break
+		}
 	}
 }

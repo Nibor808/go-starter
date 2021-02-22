@@ -268,8 +268,7 @@ func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 
 	c, err := r.Cookie("go-starter")
 	if err != nil {
-		http.Error(w, "Cannot get cookie", http.StatusInternalServerError)
-		return
+		c = &http.Cookie{}
 	}
 
 	mc, err := ParseToken(c.Value)
