@@ -14,7 +14,7 @@ const ConfirmEmail: React.FC = () => {
   const history = useHistory();
 
   useEffect(() => {
-    const validateParams = async () => {
+    (async () => {
       try {
         const response = await axios.get(
           `http://localhost:3000/api/confirmemaildata/${token}/${userID}`
@@ -24,9 +24,7 @@ const ConfirmEmail: React.FC = () => {
       } catch (err) {
         setError(err.response.data);
       }
-    };
-
-    validateParams();
+    })();
   }, []);
 
   return (

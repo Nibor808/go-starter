@@ -22,7 +22,7 @@ const User: React.FC = () => {
   }, [error]);
 
   useEffect(() => {
-    const handleUser = async () => {
+    (async () => {
       try {
         const response = await axios.get("api/user");
 
@@ -38,9 +38,7 @@ const User: React.FC = () => {
 
         setError(err.response.data);
       }
-    };
-
-    handleUser();
+    })();
   }, [history]);
 
   return (

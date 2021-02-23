@@ -24,7 +24,7 @@ func NewDataController(db *mongo.Database) *DataController {
 }
 
 // AllData returns all saved data as json
-func (dc DataController) AllData(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (dc DataController) AllData(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json charset=utf8")
 
 	var data []model.Data

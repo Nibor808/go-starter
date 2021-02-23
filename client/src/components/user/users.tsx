@@ -24,7 +24,7 @@ const Users: React.FC = () => {
   }, [error]);
 
   useEffect(() => {
-    const handleUsers = async () => {
+    (async () => {
       try {
         const response = await axios.get("api/users");
 
@@ -40,9 +40,7 @@ const Users: React.FC = () => {
 
         setError(err.response.data);
       }
-    };
-
-    handleUsers();
+    })();
   }, [history]);
 
   return (
