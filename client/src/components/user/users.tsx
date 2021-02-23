@@ -16,36 +16,48 @@ const Users: React.FC = () => {
   ]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
+    const id = setTimeout(() => {
       setError('');
     }, 2000);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(id);
   }, [error]);
 
-  const handleUsers = async () => {
-    try {
-      const response = await axios.get('api/users');
+  useEffect(() => {
+    const handleUsers = async () => {
+      try {
+        const response = await axios.get('api/users');
 
-      setUsers(response.data);
-    } catch (err) {
-      if (err.response.status === 401) return history.push('/');
-      setError(err.response.data);
-    }
-  };
+        setUsers(response.data);
+      } catch (err) {
+        if (err.response.status === 401) {
+          setError(err.response.data);
+
+          setTimeout(() => {
+            return history.push('/');
+          }, 2000);
+        }
+
+        setError(err.response.data);
+      }
+    };
+
+    handleUsers();
+  }, [history]);
 
   return (
     <>
       <p>All Users</p>
-      {error ? <p>ERROR: {error}</p> : null}
+      {error ? <p className='error'>ERROR: {error}</p> : null}
 
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.email}</li>
-        ))}
-      </ul>
-
-      <button onClick={handleUsers}>All Users</button>
+      {users.map(user => (
+        <ul key={user.id}>
+          <li>id: {user.id}</li>
+          <li>email: {user.email}</li>
+          <li>isActive: {String(user.isActive)}</li>
+          <li>isAdmin: {String(user.isAdmin)}</li>
+        </ul>
+      ))}
     </>
   );
 };

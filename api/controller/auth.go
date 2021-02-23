@@ -284,16 +284,11 @@ func (ac AuthController) SignOut(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 
 	c = &http.Cookie{
-		Name:   "go-starter",
-		Value:  "",
-		MaxAge: -1,
+		Name:     "go-starter",
+		Value:    "",
+		MaxAge:   -1,
+		HttpOnly: true,
 	}
 
 	http.SetCookie(w, c)
-
-	_, err = w.Write([]byte("Signed out"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }

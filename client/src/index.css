@@ -1,0 +1,90 @@
+body,
+html {
+  height: 100%;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 3.2rem;
+}
+
+h3 {
+  font-size: 1.875rem;
+}
+
+p,
+a,
+li {
+  font-size: 1.6rem;
+}
+
+label {
+  font-size: 1.4rem;
+}
+
+ul {
+  list-style: none;
+}
+
+ul > li {
+  padding: 2px 0;
+}
+
+.app {
+  padding: 2rem;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.app-menu {
+  width: 30%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.app-sub-menu {
+  width: 30%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.v-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.v-form > input {
+  margin: 0.5rem 0;
+}
+
+.websocket-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.websocket-header > p:not(:first-child) {
+  margin-left: 20px;
+}
+
+.error {
+  color: crimson;
+}
+
+.success {
+  color: green;
+}

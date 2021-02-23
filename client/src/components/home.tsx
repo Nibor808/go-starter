@@ -2,12 +2,15 @@ import { Link } from 'react-router-dom';
 
 const Home: React.FC = () => {
   return (
-    <div>
+    <>
       <h3>Sign in or sign up.</h3>
-      <Link to='signupemail'>create user</Link>
 
-      <Link to='signin'>sign in</Link>
-    </div>
+      <div className='app-sub-menu'>
+        <Link to='signupemail'>create user</Link>
+
+        <Link to='signin'>sign in</Link>
+      </div>
+    </>
   );
 };
 

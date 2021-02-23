@@ -3,13 +3,17 @@ import { useState, useEffect, useRef } from 'react';
 const MyWebSocket: React.FC = () => {
   const socket = useRef<WebSocket | null>(null);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [websocketResponse, setWebsocketResponse] = useState('');
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    setTimeout(() => {
+    const id = setTimeout(() => {
       setMessage('');
-    }, 2000);
+      setError('');
+    }, 3000);
+
+    return () => clearTimeout(id);
   }, [message]);
 
   useEffect(() => {
@@ -35,8 +39,8 @@ const MyWebSocket: React.FC = () => {
         setMessage('SOCKET CLOSED: ' + ev.code);
       };
 
-      socket.current.onerror = (ev: Event) => {
-        setMessage('ERROR: ' + ev);
+      socket.current.onerror = () => {
+        setError('There was an error with the websocket.');
       };
     }
 
@@ -56,7 +60,7 @@ const MyWebSocket: React.FC = () => {
     if (socket.current?.readyState === socket.current?.OPEN) {
       socket.current?.send(msg);
     } else {
-      setMessage('WebSocket closed. Refresh to re-open');
+      setError('WebSocket closed. Refresh to re-open');
       setWebsocketResponse('');
       setCounter(0);
       elem.value = '';
@@ -65,12 +69,18 @@ const MyWebSocket: React.FC = () => {
 
   return (
     <>
-      <p>Messages: {message}</p>
+      <div className='websocket-header'>
+        <p>Websocket</p>
+
+        {message ? <p className='success'>{message}</p> : null}
+      </div>
+
+      {error ? <p className='error'>{error}</p> : null}
 
       <p>Websocket Response: {websocketResponse}</p>
       <p>Responses Recieved: {counter}</p>
 
-      <div>
+      <div className='v-form'>
         <label htmlFor='messageInput'>Message</label>
         <input type='text' id='messageInput' />
       </div>

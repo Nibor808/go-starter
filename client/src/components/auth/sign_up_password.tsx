@@ -35,7 +35,7 @@ const SignUpPassword: React.FC = () => {
       <p>Now add a password.</p>
       {message ? <p>{message}</p> : null}
 
-      <form onSubmit={handleSubmit} method='POST'>
+      <form onSubmit={handleSubmit} method='POST' className='v-form'>
         <label htmlFor='password'>password</label>
         <input id='password' type='password' onChange={ev => setPassword(ev.target.value)} />
 

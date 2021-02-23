@@ -158,7 +158,7 @@ func createCookie(saved bool, ss string) *http.Cookie {
 			Name:     "go-starter",
 			Value:    ss,
 			MaxAge:   600,
-			HttpOnly: false,
+			HttpOnly: true,
 		}
 	}
 
@@ -166,6 +166,6 @@ func createCookie(saved bool, ss string) *http.Cookie {
 		Name:     "",
 		Value:    "",
 		MaxAge:   0,
-		HttpOnly: false,
+		HttpOnly: true,
 	}
 }

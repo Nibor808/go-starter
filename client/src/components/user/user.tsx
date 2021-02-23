@@ -14,40 +14,44 @@ const User: React.FC = () => {
   });
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
+    const id = setTimeout(() => {
       setError('');
     }, 2000);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(id);
   }, [error]);
 
-  const handleUser = async () => {
-    try {
-      const response = await axios.get('api/user');
+  useEffect(() => {
+    const handleUser = async () => {
+      try {
+        const response = await axios.get('api/user');
 
-      setUser(response.data);
-    } catch (err) {
-      if (err.response.status === 401) {
+        setUser(response.data);
+      } catch (err) {
+        if (err.response.status === 401) {
+          setError(err.response.data);
+
+          setTimeout(() => {
+            return history.push('/');
+          }, 1500);
+        }
+
         setError(err.response.data);
-
-        setTimeout(() => {
-          return history.push('/');
-        }, 1500);
       }
-
-      setError(err.response.data);
-    }
-  };
+    };
+    handleUser();
+  }, [history]);
 
   return (
     <>
       <p>User From Cookie</p>
-      {error ? <p>ERROR: {error}</p> : null}
+      {error ? <p className='error'>ERROR: {error}</p> : null}
       <ul>
-        <li>{user.email}</li>
+        <li>id: {user.id}</li>
+        <li>email: {user.email}</li>
+        <li>isActive: {String(user.isActive)}</li>
+        <li>isAdmin: {String(user.isAdmin)}</li>
       </ul>
-
-      <button onClick={handleUser}>User From Cookie</button>
     </>
   );
 };

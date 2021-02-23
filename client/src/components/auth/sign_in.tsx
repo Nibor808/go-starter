@@ -5,14 +5,14 @@ import axios from 'axios';
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const history = useHistory();
 
   useEffect(() => {
     setTimeout(() => {
-      setMessage('');
+      setError('');
     }, 2000);
-  }, [message]);
+  }, [error]);
 
   const handleSubmit: React.FormEventHandler = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -24,7 +24,7 @@ const SignIn: React.FC = () => {
     try {
       await axios.post('api/signin', formData).then(() => history.push('/dashboard'));
     } catch (err) {
-      setMessage(err.response.data);
+      setError(err.response.data);
     }
   };
 
@@ -32,9 +32,9 @@ const SignIn: React.FC = () => {
     <div>
       <h3>Sign In</h3>
 
-      {message ? <p>{message}</p> : null}
+      {error ? <p className='error'>{error}</p> : null}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='v-form'>
         <label htmlFor='email'>email</label>
         <input id='email' type='email' onChange={ev => setEmail(ev.target.value)} />
 
