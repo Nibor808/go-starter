@@ -3,24 +3,32 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 
 const App: React.FC = (props: React.PropsWithChildren<{}>) => {
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const history = useHistory();
 
   useEffect(() => {
     const id = setTimeout(() => {
-      setMessage("");
+      setError("");
     }, 3000);
 
     return () => clearTimeout(id);
-  }, [message]);
+  }, [error]);
 
   const handleSignOut = async () => {
     try {
       const response = await axios.get("api/signout");
-      setMessage(response.data);
+      setError(response.data);
       history.push("/");
     } catch (err) {
-      setMessage(err.response.data);
+      if (err.response.status === 401) {
+        setError(err.response.data);
+
+        setTimeout(() => {
+          return history.push("/");
+        }, 1500);
+      }
+
+      setError(err.response.data);
     }
   };
 
@@ -34,7 +42,7 @@ const App: React.FC = (props: React.PropsWithChildren<{}>) => {
         </div>
       </header>
 
-      {message ? <p className="error">{message}</p> : null}
+      {error ? <p className="error">{error}</p> : null}
 
       {props.children}
     </div>
