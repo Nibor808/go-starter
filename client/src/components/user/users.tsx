@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { IUser } from './interfaces';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { IUser } from "./interfaces";
+import { useHistory } from "react-router-dom";
 
 const Users: React.FC = () => {
   const history = useHistory();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [users, setUsers] = useState<[IUser]>([
     {
-      id: '',
-      email: '',
+      id: "",
+      email: "",
       isActive: false,
       isAdmin: false,
     },
@@ -17,7 +17,7 @@ const Users: React.FC = () => {
 
   useEffect(() => {
     const id = setTimeout(() => {
-      setError('');
+      setError("");
     }, 2000);
 
     return () => clearTimeout(id);
@@ -26,7 +26,7 @@ const Users: React.FC = () => {
   useEffect(() => {
     const handleUsers = async () => {
       try {
-        const response = await axios.get('api/users');
+        const response = await axios.get("api/users");
 
         setUsers(response.data);
       } catch (err) {
@@ -34,7 +34,7 @@ const Users: React.FC = () => {
           setError(err.response.data);
 
           setTimeout(() => {
-            return history.push('/');
+            return history.push("/");
           }, 2000);
         }
 
@@ -48,9 +48,9 @@ const Users: React.FC = () => {
   return (
     <>
       <p>All Users</p>
-      {error ? <p className='error'>ERROR: {error}</p> : null}
+      {error ? <p className="error">ERROR: {error}</p> : null}
 
-      {users.map(user => (
+      {users.map((user) => (
         <ul key={user.id}>
           <li>id: {user.id}</li>
           <li>email: {user.email}</li>

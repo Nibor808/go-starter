@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { IUser } from './interfaces';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { IUser } from "./interfaces";
+import { useHistory } from "react-router-dom";
 
 const User: React.FC = () => {
   const history = useHistory();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [user, setUser] = useState<IUser>({
-    id: '',
-    email: '',
+    id: "",
+    email: "",
     isActive: false,
     isAdmin: false,
   });
 
   useEffect(() => {
     const id = setTimeout(() => {
-      setError('');
+      setError("");
     }, 2000);
 
     return () => clearTimeout(id);
@@ -24,7 +24,7 @@ const User: React.FC = () => {
   useEffect(() => {
     const handleUser = async () => {
       try {
-        const response = await axios.get('api/user');
+        const response = await axios.get("api/user");
 
         setUser(response.data);
       } catch (err) {
@@ -32,20 +32,21 @@ const User: React.FC = () => {
           setError(err.response.data);
 
           setTimeout(() => {
-            return history.push('/');
+            return history.push("/");
           }, 1500);
         }
 
         setError(err.response.data);
       }
     };
+
     handleUser();
   }, [history]);
 
   return (
     <>
       <p>User From Cookie</p>
-      {error ? <p className='error'>ERROR: {error}</p> : null}
+      {error ? <p className="error">ERROR: {error}</p> : null}
       <ul>
         <li>id: {user.id}</li>
         <li>email: {user.email}</li>

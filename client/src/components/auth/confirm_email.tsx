@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useParams, useHistory } from "react-router-dom";
+import axios from "axios";
 
 interface RouteParams {
   token: string;
@@ -8,8 +8,8 @@ interface RouteParams {
 }
 
 const ConfirmEmail: React.FC = () => {
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const { token, userID }: RouteParams = useParams();
   const history = useHistory();
 
@@ -20,7 +20,7 @@ const ConfirmEmail: React.FC = () => {
           `http://localhost:3000/api/confirmemaildata/${token}/${userID}`
         );
         setSuccess(response.data);
-        history.push('/signuppassword');
+        history.push("/signuppassword");
       } catch (err) {
         setError(err.response.data);
       }

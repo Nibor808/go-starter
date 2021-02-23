@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const SignUpEmail: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     setTimeout(() => {
-      setMessage('');
+      setMessage("");
     }, 2000);
   }, [message]);
 
@@ -15,10 +15,10 @@ const SignUpEmail: React.FC = () => {
     ev.preventDefault();
 
     const formData = new FormData();
-    formData.append('email', email);
+    formData.append("email", email);
 
     try {
-      const response = await axios.post('api/signupemail', formData);
+      const response = await axios.post("api/signupemail", formData);
 
       setMessage(response.data);
     } catch (err) {
@@ -36,11 +36,18 @@ const SignUpEmail: React.FC = () => {
 
       {message ? <p>{message}</p> : null}
 
-      <form onSubmit={handleSubmit} method='POST' className='v-form'>
-        <label htmlFor='email'>email</label>
-        <input id='email' type='email' value={email} onChange={ev => setEmail(ev.target.value)} />
+      <form onSubmit={handleSubmit} method="POST" className="v-form">
+        <label htmlFor="email">email</label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+            setEmail(ev.target.value)
+          }
+        />
 
-        <button type='submit'>Send</button>
+        <button type="submit">Send</button>
       </form>
     </div>
   );
