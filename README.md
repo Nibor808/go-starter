@@ -2,7 +2,6 @@
 
 A starter setup for a REST api with React, Go, MongoDB, and Docker.
 
-No styling or layout for client yet!
 
 ## Sessions
 
