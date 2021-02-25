@@ -1,15 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"go-starter/controller"
 	"go-starter/middleware"
 	"go-starter/utils"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/websocket"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -57,6 +58,15 @@ func main() {
 	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 
+type ServerMessage struct {
+	Type string
+	Text string
+}
+
+type ClientMessage struct {
+	Text string `json:"text"`
+}
+
 func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var upgrader = websocket.Upgrader{}
 
@@ -75,16 +85,63 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 	}
 	defer conn.Close()
 
+	go pinger(conn)
+
 	for {
-		mt, message, err := conn.ReadMessage()
+		var clientMessage ClientMessage
+		err = conn.ReadJSON(&clientMessage)
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				fmt.Println("IsUnexpectedCloseError", err)
+				break
+			}
+
+			fmt.Println("ERROR: ", err)
+			break
+		}
+
+		serverMessage := ServerMessage{
+			Type: "echo",
+			Text: "Server here. Message {"+clientMessage.Text+"} received!",
+		}
+
+		msg, err := json.Marshal(&serverMessage)
 		if err != nil {
 			fmt.Println("ERROR: ", err)
 			break
 		}
 
-		err = conn.WriteMessage(mt, []byte("Server here. Message {"+string(message)+"} received!"))
+
+		err = conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			fmt.Println("ERROR: ", err)
+			break
+		}
+	}
+}
+
+func pinger(conn *websocket.Conn) {
+	tick := time.Tick(45 * time.Second)
+
+	serverMessage := ServerMessage{
+		Type: "ping",
+		Text: "Socket refreshed from server.",
+	}
+
+	msg, err := json.Marshal(&serverMessage)
+	if err != nil {
+		fmt.Println("ERROR: ", err)
+		return
+	}
+
+	for range tick {
+		err = conn.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				fmt.Println("IsUnexpectedCloseError", err)
+				break
+			}
+
 			break
 		}
 	}

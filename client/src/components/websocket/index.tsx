@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 
+interface ClientMessage {
+  Text: string;
+}
+
+interface ServerMessage {
+  Type: string;
+  Text: string;
+}
+
 const MyWebSocket: React.FC = () => {
   const socket = useRef<WebSocket | null>(null);
   const [message, setMessage] = useState("");
@@ -23,8 +32,14 @@ const MyWebSocket: React.FC = () => {
   useEffect(() => {
     if (socket.current) {
       socket.current.onmessage = (ev: MessageEvent) => {
-        setWebsocketResponse(ev.data);
-        setCounter(counter + 1);
+        const jsonMessage: ServerMessage = JSON.parse(ev.data);
+
+        if (jsonMessage.Type === "echo") {
+          setWebsocketResponse(jsonMessage.Text);
+          setCounter(counter + 1);
+        } else {
+          setMessage(jsonMessage.Text);
+        }
       };
     }
   }, [counter]);
@@ -58,7 +73,13 @@ const MyWebSocket: React.FC = () => {
     ev.preventDefault();
 
     if (socket.current?.readyState === socket.current?.OPEN) {
-      socket.current?.send(msg);
+      const clientMessage: ClientMessage = {
+        Text: msg,
+      };
+
+      const cm = JSON.stringify(clientMessage);
+
+      socket.current?.send(cm);
     } else {
       setError("WebSocket closed. Refresh to re-open");
       setWebsocketResponse("");
@@ -78,7 +99,7 @@ const MyWebSocket: React.FC = () => {
       {error ? <p className="error">{error}</p> : null}
 
       <p>Websocket Response: {websocketResponse}</p>
-      <p>Responses Recieved: {counter}</p>
+      <p>Responses Received: {counter}</p>
 
       <div className="v-form">
         <label htmlFor="messageInput">Message</label>

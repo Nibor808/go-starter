@@ -11,6 +11,8 @@ This can be changed in `api/utils/db.go line 55 -> ttl := int32(600)`
 
 Session ttl is refreshed by hitting an endpoint.
 
+Websocket is refreshed from the server every 45 seconds.
+
 ### Add .env in api/ with the following keys and add your values
 
 ```

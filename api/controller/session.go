@@ -45,10 +45,7 @@ func (c MyClaims) Valid() error {
 	return nil
 }
 
-// GetCookie creates a sID
-// creates a JWT token and a Session with the sID
-// saves the Session to the database
-// returns pointer to a cookie
+// GetCookie returns the created cookie
 func (ac AuthController) GetCookie(w http.ResponseWriter, userID primitive.ObjectID) *http.Cookie {
 	sID, err := createUID()
 	if err != nil {
