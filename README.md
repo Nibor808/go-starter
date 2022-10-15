@@ -35,7 +35,7 @@ MAIL_HOST=<your-mail-host> eg smtp.gmail.com
 
 ### Start app
 
-`docker-compose up --build`
+`docker compose up --build`
 
 In your console you should see:
 
