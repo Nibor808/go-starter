@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { IUser } from './interfaces';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Users: React.FC = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const [error, setError] = useState('');
     const [users, setUsers] = useState<[IUser]>([
         {
@@ -29,19 +29,19 @@ const Users: React.FC = () => {
                 const response = await axios.get('api/users');
 
                 setUsers(response.data);
-            } catch (err) {
+            } catch (err: any) {
                 if (err.response.status === 401) {
                     setError(err.response.data);
 
                     setTimeout(() => {
-                        return history.push('/');
+                        return navigate('/');
                     }, 2000);
                 }
 
                 setError(err.response.data);
             }
         })();
-    }, [history]);
+    }, [navigate]);
 
     return (
         <>

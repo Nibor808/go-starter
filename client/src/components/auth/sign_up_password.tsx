@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SignUpPassword: React.FC = () => {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setTimeout(() => {
@@ -22,8 +22,8 @@ const SignUpPassword: React.FC = () => {
         try {
             await axios.post('api/signuppassword', formData);
 
-            history.push('dashboard');
-        } catch (err) {
+            navigate('dashboard');
+        } catch (err: any) {
             setMessage(err.response.data);
         }
     };

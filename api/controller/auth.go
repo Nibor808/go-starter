@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"go-starter/model"
-	"go-starter/utils"
+	"api/model"
+	"api/utils"
 	"net/http"
 	"strings"
 	"time"

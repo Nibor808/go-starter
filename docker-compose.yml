@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile.dev
       context: ./api
     volumes:
-      - ./api:/go-starter
+      - ./api:/api
     environment:
       - DEPLOY_MODE=development
     env_file:
@@ -30,4 +30,4 @@ services:
       dockerfile: Dockerfile.dev
       context: ./nginx
     ports:
-      - 3000:80
+      - '3000:80'

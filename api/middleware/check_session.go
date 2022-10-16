@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"api/controller"
+	"api/model"
 	"context"
-	"go-starter/controller"
-	"go-starter/model"
 	"net/http"
 	"time"
 

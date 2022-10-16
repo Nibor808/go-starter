@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
-	"go-starter/model"
-	"go-starter/utils"
+	"api/model"
+	"api/utils"
 	"log"
 	"net/http"
 	"time"

@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-
-interface RouteParams {
-    token: string;
-    userID: string;
-}
 
 const ConfirmEmail: React.FC = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const { token, userID }: RouteParams = useParams();
-    const history = useHistory();
+    const { token, userID } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/api/confirmemaildata/${token}/${userID}`);
                 setSuccess(response.data);
-                history.push('/signuppassword');
-            } catch (err) {
+                navigate('/signuppassword');
+            } catch (err: any) {
                 setError(err.response.data);
             }
         })();

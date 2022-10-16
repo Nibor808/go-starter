@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"go-starter/model"
+	"api/model"
 	"log"
 	"net/http"
 

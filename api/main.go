@@ -1,16 +1,17 @@
 package main
 
 import (
+	"api/controller"
+	"api/middleware"
+	"api/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"go-starter/controller"
-	"go-starter/middleware"
-	"go-starter/utils"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gorilla/websocket"
 
 	"github.com/julienschmidt/httprouter"
 )

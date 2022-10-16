@@ -21,7 +21,7 @@ const SignUpEmail: React.FC = () => {
             const response = await axios.post('api/signupemail', formData);
 
             setMessage(response.data);
-        } catch (err) {
+        } catch (err: any) {
             setMessage(err.response.data);
         }
     };

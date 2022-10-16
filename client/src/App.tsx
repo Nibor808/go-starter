@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const App: React.FC = (props: React.PropsWithChildren<{}>) => {
+export const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [error, setError] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const id = setTimeout(() => {
@@ -18,13 +18,13 @@ const App: React.FC = (props: React.PropsWithChildren<{}>) => {
         try {
             const response = await axios.get('api/signout');
             setError(response.data);
-            history.push('/');
-        } catch (err) {
+            navigate('/');
+        } catch (err: any) {
             if (err.response.status === 401) {
                 setError(err.response.data);
 
                 setTimeout(() => {
-                    return history.push('/');
+                    return navigate('/');
                 }, 1500);
             }
 
@@ -44,9 +44,7 @@ const App: React.FC = (props: React.PropsWithChildren<{}>) => {
 
             {error ? <p className="error">{error}</p> : null}
 
-            {props.children}
+            {children}
         </div>
     );
 };
-
-export default App;
