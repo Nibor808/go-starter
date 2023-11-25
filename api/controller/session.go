@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"context"
-	"fmt"
 	"api/model"
 	"api/utils"
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"

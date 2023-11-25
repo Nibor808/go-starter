@@ -103,7 +103,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 
 		serverMessage := ServerMessage{
 			Type: "echo",
-			Text: "Server here. Message {"+clientMessage.Text+"} received!",
+			Text: "Server here. Message {" + clientMessage.Text + "} received!",
 		}
 
 		msg, err := json.Marshal(&serverMessage)
@@ -111,7 +111,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 			fmt.Println("ERROR: ", err)
 			break
 		}
-
 
 		err = conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
