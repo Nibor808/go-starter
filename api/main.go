@@ -84,7 +84,13 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 		fmt.Println("ERROR: ", err)
 		return
 	}
-	defer conn.Close()
+
+	defer func(conn *websocket.Conn) {
+		err := conn.Close()
+		if err != nil {
+
+		}
+	}(conn)
 
 	go pinger(conn)
 
@@ -121,7 +127,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 }
 
 func pinger(conn *websocket.Conn) {
-	tick := time.Tick(45 * time.Second)
+	tick := time.Tick(60 * time.Second)
 
 	serverMessage := ServerMessage{
 		Type: "ping",

@@ -24,14 +24,14 @@ func GetMongoSession() *mongo.Database {
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(keys.DBConn))
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MONGO CONNECTION", err)
 	}
 
 	db := client.Database(keys.DBName)
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MONGO CLIENT PING", err)
 	}
 
 	/*
@@ -49,7 +49,7 @@ func GetMongoSession() *mongo.Database {
 			Options: options.Index().SetUnique(true),
 		}, opts)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MONGO COLLECTION users ->", err)
 	}
 
 	ttl := int32(600)
@@ -62,7 +62,7 @@ func GetMongoSession() *mongo.Database {
 			},
 		}, opts)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MONGO COLLECTION tokens ->", err)
 	}
 
 	sessionIndex, err := db.Collection("sessions").Indexes().CreateOne(
@@ -74,7 +74,7 @@ func GetMongoSession() *mongo.Database {
 			},
 		}, opts)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MONGO COLLECTION sessions ->", err)
 	}
 
 	fmt.Println("Indexes:", emailIndex, tokenIndex, sessionIndex)

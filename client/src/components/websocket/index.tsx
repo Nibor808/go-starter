@@ -51,7 +51,7 @@ const MyWebSocket: React.FC = () => {
             };
 
             socket.current.onclose = (ev: CloseEvent) => {
-                setMessage('SOCKET CLOSED: ' + ev.code);
+                setMessage(`SOCKET CLOSED: ${ev.code}`);
             };
 
             socket.current.onerror = () => {
