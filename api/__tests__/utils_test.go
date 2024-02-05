@@ -1,7 +1,7 @@
 package utils_test
 
 import (
-	"go-starter/utils"
+	"api/utils"
 	"strings"
 	"testing"
 
