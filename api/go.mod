@@ -2,8 +2,6 @@ module api
 
 go 1.24.4
 
-toolchain go1.24.4
-
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofrs/uuid v4.4.0+incompatible
