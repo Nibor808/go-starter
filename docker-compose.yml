@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   client:
     stdin_open: true # to fix bug in create-react-app
