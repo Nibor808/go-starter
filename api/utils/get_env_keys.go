@@ -2,7 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // Keys is ...
@@ -18,6 +21,11 @@ type Keys struct {
 
 // GetKeys returns the env keys
 func GetKeys() (Keys, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	devURL, exists := os.LookupEnv("DEV_URL")
 	if !exists {
 		return Keys{}, fmt.Errorf("cannot get DEV_URL from .env")
